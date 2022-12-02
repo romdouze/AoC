@@ -1,31 +1,12 @@
 package com.ngr.aoc.y2022
 
-class Day1 {
+import java.io.InputStream
 
-    companion object {
-        const val PATH = "/input/2022/"
-        private const val DAY = 1
-        private const val INPUT = "input-$DAY-<part>.txt"
-    }
+class Day1 : Day<List<Int>, Int, Int>() {
 
-    fun part1() {
-        val lines = readInput(PATH + INPUT.replace("<part>", "1"))
-
-        println(lines.maxBy { it.sum() }.sum())
-    }
-
-    fun part2() {
-        val lines = readInput(PATH + INPUT.replace("<part>", "1"))
-
-        println(
-            lines.sortedByDescending { it.sum() }
-                .take(3).sumOf { it.sum() }
-        )
-    }
-
-    private fun readInput(input: String): MutableList<MutableList<Int>> {
+    override fun readInput(data: InputStream): List<List<Int>> {
         val splitted = mutableListOf(mutableListOf<Int>())
-        object {}.javaClass.getResourceAsStream(input)?.bufferedReader()?.forEachLine {
+        data.bufferedReader().forEachLine {
             if (it.isBlank()) {
                 splitted.add(mutableListOf())
             } else {
@@ -35,4 +16,11 @@ class Day1 {
 
         return splitted
     }
+
+    override fun part1(lines: List<List<Int>>) =
+        lines.maxBy { it.sum() }.sum()
+
+    override fun part2(lines: List<List<Int>>) =
+        lines.sortedByDescending { it.sum() }
+            .take(3).sumOf { it.sum() }
 }
