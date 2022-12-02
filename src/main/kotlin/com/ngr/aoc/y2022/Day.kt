@@ -4,9 +4,6 @@ import java.io.InputStream
 
 abstract class Day<InputType, Part1OutputType, Part2OutputType> {
 
-    private companion object {
-    }
-
     fun run(fileName: String): Result? {
         val inputStream = object {}.javaClass.getResourceAsStream(fileName) ?: return null
 
@@ -20,7 +17,16 @@ abstract class Day<InputType, Part1OutputType, Part2OutputType> {
         )
     }
 
-    abstract fun readInput(data: InputStream): List<InputType>
+    private fun readInput(data: InputStream): List<InputType> {
+        val lines = mutableListOf<InputType>()
+        data.bufferedReader().forEachLine {
+            handleLine(lines, it)
+        }
+
+        return lines
+    }
+
+    abstract fun handleLine(lines: MutableList<InputType>, line: String)
 
     abstract fun part1(lines: List<InputType>): Part1OutputType
 

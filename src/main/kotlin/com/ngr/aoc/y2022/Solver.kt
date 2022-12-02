@@ -4,7 +4,7 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
 
 
-private const val DAY = 1
+private const val DAY = 2
 
 private const val PATH = "/input/2022/"
 private const val FILENAME = "${PATH}input-$DAY.txt"
