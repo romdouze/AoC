@@ -4,18 +4,25 @@ import java.io.InputStream
 
 abstract class Day<InputType, Part1OutputType, Part2OutputType> {
 
-    fun run(fileName: String): Result? {
+    fun run(fileName: String): DayResult? {
         val inputStream = object {}.javaClass.getResourceAsStream(fileName) ?: return null
 
         val dataLines = inputStream.use {
             readInput(inputStream)
         }
 
-        return Result(
-            part1(dataLines).toString(),
-            part2(dataLines).toString(),
+        return DayResult(
+            handleResult { part1(dataLines) },
+            handleResult { part2(dataLines) },
         )
     }
+
+    private fun <T> handleResult(toRun: () -> T) =
+        try {
+            Result.success(toRun().toString())
+        } catch (e: Throwable) {
+            Result.failure(e)
+        }
 
     private fun readInput(data: InputStream): List<InputType> {
         val lines = mutableListOf<InputType>()
