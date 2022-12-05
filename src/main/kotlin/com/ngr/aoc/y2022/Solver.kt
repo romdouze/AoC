@@ -4,11 +4,11 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
 
 object Solver {
-    private const val DAY = 4
+    private const val DAY = 5
 
     private const val PATH = "/input/2022/"
     private const val FILENAME = "${PATH}input-$DAY.txt"
-    private const val PACKAGE = "com.ngr.aoc.y2022"
+    private const val PACKAGE = "com.ngr.aoc.y2022.day$DAY"
 
     @JvmStatic fun main(args: Array<String>) {
 
