@@ -24,7 +24,7 @@ abstract class Day<InputType, Part1OutputType, Part2OutputType> {
             Result.failure(e)
         }
 
-    private fun readInput(data: InputStream): List<InputType> {
+    protected open fun readInput(data: InputStream): List<InputType> {
         val lines = mutableListOf<InputType>()
         data.bufferedReader().forEachLine {
             handleLine(lines, it)
