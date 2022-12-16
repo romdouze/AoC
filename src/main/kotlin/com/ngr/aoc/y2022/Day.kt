@@ -1,5 +1,6 @@
 package com.ngr.aoc.y2022
 
+import com.ngr.aoc.y2022.common.timed
 import java.io.InputStream
 
 abstract class Day<InputType, Part1OutputType, Part2OutputType> {
@@ -12,8 +13,8 @@ abstract class Day<InputType, Part1OutputType, Part2OutputType> {
         }
 
         return DayResult(
-            handleResult { part1(dataLines) },
-            handleResult { part2(dataLines) },
+            handleResult { timed { part1(dataLines) } },
+            handleResult { timed { part2(dataLines) } },
         )
     }
 
