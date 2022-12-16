@@ -13,8 +13,8 @@ abstract class Day<InputType, Part1OutputType, Part2OutputType> {
         }
 
         return DayResult(
-            handleResult { timed { part1(dataLines) } },
-            handleResult { timed { part2(dataLines) } },
+            timed { handleResult { part1(dataLines) } },
+            timed { handleResult { part2(dataLines) } },
         )
     }
 

@@ -2,7 +2,6 @@ package com.ngr.aoc.y2022
 
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
-import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
 object Solver {
@@ -24,14 +23,11 @@ object Solver {
             ) as DayResult?
 
         dayResult?.apply {
-            println("part1: ${part1.print()}")
-            println("part2: ${part2.print()}")
+            println("part1: ${part1.first.print()} [${part1.second.toString(DurationUnit.MILLISECONDS, 2)}]")
+            println("part2: ${part2.first.print()} [${part2.second.toString(DurationUnit.MILLISECONDS, 2)}]")
         }
     }
 
-    private fun <T> Result<Pair<T, Duration>>.print() =
-        if (isSuccess) {
-            val result = getOrNull()!!
-            "${result.first.toString()} [${result.second.toString(DurationUnit.MILLISECONDS, 2)}"
-        } else toString()
+    private fun <T> Result<T>.print() =
+        if (isSuccess) getOrNull().toString() else toString()
 }
