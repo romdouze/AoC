@@ -8,11 +8,15 @@ abstract class Day<InputType, Part1OutputType, Part2OutputType> {
     fun run(fileName: String): DayResult? {
         val inputStream = object {}.javaClass.getResourceAsStream(fileName) ?: return null
 
-        val dataLines = inputStream.use {
-            readInput(inputStream)
+        val (dataLines, readTime) = timed {
+            inputStream.use {
+                readInput(inputStream)
+            }
         }
 
+
         return DayResult(
+            readTime,
             timed { handleResult { part1(dataLines) } },
             timed { handleResult { part2(dataLines) } },
         )

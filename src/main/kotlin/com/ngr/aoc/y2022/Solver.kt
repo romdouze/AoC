@@ -1,8 +1,8 @@
 package com.ngr.aoc.y2022
 
+import com.ngr.aoc.y2022.common.print
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
-import kotlin.time.DurationUnit
 
 object Solver {
     private const val DAY = 11
@@ -23,8 +23,9 @@ object Solver {
             ) as DayResult?
 
         dayResult?.apply {
-            println("part1: ${part1.first.print()} [${part1.second.toString(DurationUnit.MILLISECONDS, 2)}]")
-            println("part2: ${part2.first.print()} [${part2.second.toString(DurationUnit.MILLISECONDS, 2)}]")
+            println("input read time: ${inputReadTime.print()}")
+            println("part1: ${part1.first.print()} [${part1.second.print()}]")
+            println("part2: ${part2.first.print()} [${part2.second.print()}]")
         }
     }
 

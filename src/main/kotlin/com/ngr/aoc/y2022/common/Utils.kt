@@ -12,3 +12,6 @@ fun <T> timed(label: String? = null, toTime: () -> T): Pair<T, Duration> {
     val elapsed = measureTime { result = toTime() }
     return result.also { label?.let { println("$it: ${elapsed.toString(DurationUnit.MILLISECONDS, 2)}") } } to elapsed
 }
+
+fun Duration.print() =
+    toString(DurationUnit.MILLISECONDS, 2)
