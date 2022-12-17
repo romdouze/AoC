@@ -10,7 +10,8 @@ import kotlin.time.measureTime
 fun <T> timed(label: String? = null, toTime: () -> T): Pair<T, Duration> {
     var result: T
     val elapsed = measureTime { result = toTime() }
-    return result.also { label?.let { println("$it: ${elapsed.toString(DurationUnit.MILLISECONDS, 2)}") } } to elapsed
+    return result to elapsed
+        .also { label?.let { println("$it: ${elapsed.print()}") } }
 }
 
 fun Duration.print() =

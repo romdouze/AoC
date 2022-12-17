@@ -5,7 +5,7 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
 
 object Solver {
-    private const val DAY = 12
+    private const val DAY = 13
 
     private const val PATH = "/input/2022/"
     private const val FILENAME = "${PATH}input-$DAY.txt"
