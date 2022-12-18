@@ -26,14 +26,10 @@ fun String.compareNesting(other: String): Int {
             this.compareNesting("[$s]${other.substring(1)}")
         } else if (s == '[' && f.isItem()) {
             "[$f]${this.substring(1)}".compareNesting(other)
-        } else if (f == ']') {
+        } else if (f == ']' || s == ',') {
             -1
-        } else if (s == ']') {
+        } else if (s == ']' || f == ',') {
             1
-        } else if (f == ',') {
-            1
-        } else if (s == ',') {
-            -1
         } else {
             throw IllegalArgumentException("Unexpected token: $f | $s")
         }
