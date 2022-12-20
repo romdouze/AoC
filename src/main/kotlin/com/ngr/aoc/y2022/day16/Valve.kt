@@ -7,7 +7,7 @@ data class Valve(
 ) {
     companion object {
         private val VALVE_PATTERN =
-            "Valve (?<name>\\w+) has flow rate=(?<rate>\\d+); tunnels lead to valves (?<tunnels>.+)".toRegex()
+            "Valve (?<name>\\w+) has flow rate=(?<rate>\\d+); tunnels? leads? to valves? (?<tunnels>.+)".toRegex()
 
         fun fromString(line: String) =
             VALVE_PATTERN.find(line)
