@@ -1,5 +1,7 @@
 package com.ngr.aoc.y2022.day16
 
+import java.lang.RuntimeException
+
 typealias Path = Pair<Int, List<String>>
 
 val Path.elapsed get() = first
@@ -102,11 +104,11 @@ fun Network.generateMultiPath(
                     val available =
                         availableNodes.first.minus(listOf(firstPick, secondPick).toSet())
                             .filter {
-                                (firstNext + pathTo(firstPick, it)).elapsed <= maxTime
+                                firstPick == NONE || (firstNext + pathTo(firstPick, it)).elapsed <= maxTime
                             } to
-                                availableNodes.second.minus(listOf(firstPick, secondPick).toSet())
+                                availableNodes.second.minus(setOf(firstPick, secondPick))
                                     .filter {
-                                        (secondNext + pathTo(secondPick, it)).elapsed <= maxTime
+                                        secondPick == NONE || (secondNext + pathTo(secondPick, it)).elapsed <= maxTime
                                     }
                     if (available.toList().any { it.isNotEmpty() }) {
                         if (listOf(firstNext to available.first, secondNext to available.second)
