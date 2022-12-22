@@ -1,5 +1,7 @@
 package com.ngr.aoc.y2022.day17
 
+import java.awt.Point
+
 enum class Move(
     val dx: Int, val dy: Int
 ) {
@@ -13,4 +15,7 @@ enum class Move(
                 else -> throw IllegalArgumentException("Unexpected push: $c")
             }
     }
+
+    operator fun times(n: Int) =
+        Point(dx * n, dy * n)
 }
