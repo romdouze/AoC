@@ -2,12 +2,9 @@ package com.ngr.aoc.y2022.day19
 
 import com.ngr.aoc.y2022.day19.Resource.*
 
-
-typealias Cost = Pair<Resource, Int>
-
 data class Blueprint(
     val id: Int,
-    val recipes: Map<Resource, Set<Cost>>,
+    val recipes: List<Recipe>,
 ) {
     companion object {
 
@@ -20,7 +17,7 @@ data class Blueprint(
 
             return Blueprint(
                 id.toInt(),
-                mapOf(
+                listOf(
                     ORE to setOf(Cost(ORE, oreOreCost.toInt())),
                     CLAY to setOf(Cost(ORE, clayOreCost.toInt())),
                     OBSIDIAN to setOf(
