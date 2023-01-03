@@ -17,54 +17,39 @@ data class State(
             .associateWith { 0 }
             .toMutableMap()
     ),
-    val purchases: MutableList<ResourceAmounts> = mutableListOf(),
-    val cart: ResourceAmounts = ResourceAmounts()
+    val purchases: MutableList<Pair<Resource, Int>> = mutableListOf(),
 ) {
     fun canAffordByWaiting(recipe: Recipe) =
         recipe.cost
             .filter { resources[it.resource] < it.amount }
-            .none { collectors[it.resource] + cart[it.resource] == 0 }
+            .none { collectors[it.resource] == 0 }
 
     fun tryToWaitAndBuy(recipe: Recipe, timeLimit: Int) {
-        if (canAfford(recipe)) {
-            addToCart(recipe)
+        val wait = 1 +
+                (recipe.cost
+                    .filter { resources[it.resource] < it.amount }
+                    .maxOfOrNull { waitTime(it) } ?: 0)
+        if (clock + wait <= timeLimit) {
+            wait(wait)
+            buy(recipe)
         } else {
-            wait(1)
-            buy()
-            val wait = recipe.cost
-                .filter { resources[it.resource] < it.amount }
-                .maxOfOrNull { waitTime(it) } ?: 0
-            if (clock + wait <= timeLimit) {
-                wait(wait)
-                addToCart(recipe)
-            } else {
-                waitUntil(timeLimit)
-            }
+            waitUntil(timeLimit)
         }
     }
 
     fun potentialResource(resource: Resource, timeLimit: Int) =
-        resources[resource] + (collectors[resource] + cart[resource]) * (timeLimit - clock)
+        (timeLimit - clock)
+            .let { remainingTime ->
+                resources[resource] + collectors[resource] * remainingTime + remainingTime * (remainingTime + 1) / 2
+            }
 
-    fun canAfford(recipe: Recipe) =
-        recipe.cost.none {
-            resources[it.resource] < it.amount
-        }
-
-    fun addToCart(recipe: Recipe) {
-        cart.add(recipe.resource, 1)
+    fun buy(recipe: Recipe) {
+        collectors += recipe.resource to 1
+        purchases.add(recipe.resource to clock)
         recipe.cost
             .forEach {
                 resources.add(it.resource, -it.amount)
             }
-    }
-
-    fun buy() {
-        if (cart.isNotEmpty()) {
-            collectors.addAll(cart)
-            purchases.add(cart.clone())
-            cart.clear()
-        }
     }
 
     fun waitUntil(timeLimit: Int) {
@@ -95,16 +80,14 @@ data class State(
         copy(
             collectors = collectors.clone(),
             resources = resources.clone(),
-            purchases = purchases.map { it.clone() }.toMutableList(),
-            cart = cart.clone()
+            purchases = purchases.toMutableList(),
         )
 
     override fun equals(other: Any?): Boolean {
         return if (other is State) {
             clock == other.clock &&
                     resources == other.resources &&
-                    collectors == other.collectors &&
-                    cart == other.cart
+                    collectors == other.collectors
         } else {
             super.equals(other)
         }
@@ -113,7 +96,6 @@ data class State(
     override fun hashCode(): Int {
         return resources.hashCode() +
                 31 * collectors.hashCode() +
-                31 * cart.hashCode() +
                 31 * clock
     }
 }

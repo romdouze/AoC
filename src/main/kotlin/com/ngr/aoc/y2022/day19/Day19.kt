@@ -1,25 +1,28 @@
 package com.ngr.aoc.y2022.day19
 
 import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.y2022.day19.Resource.GEODE
 
 class Day19 : Day<Blueprint, Int, Int>() {
     override fun handleLine(lines: MutableList<Blueprint>, line: String) {
         lines.add(Blueprint.fromString(line))
     }
 
-    override fun part1(lines: List<Blueprint>): Int {
-        var bestBlueprint = Pair(-1, -1)
-        for (blueprintEngine in lines.map { BlueprintEngine(it, 24) }) {
-            println("**** blueprint ${blueprintEngine.blueprint.id} ****")
-            val thisBest = blueprintEngine.maximizeGeode(bestBlueprint.second)
-            if (thisBest.resources[Resource.GEODE] > bestBlueprint.second) {
-                bestBlueprint = blueprintEngine.blueprint.id to thisBest.resources[Resource.GEODE]
+    override fun part1(lines: List<Blueprint>) =
+        lines
+            .map { BlueprintEngine(it, 24) }
+            .fold(0) { sum, blueprintEngine ->
+                println("**** blueprint ${blueprintEngine.blueprint.id} ****")
+                val thisBest = blueprintEngine.maximizeGeode()
+                sum + thisBest.resources[GEODE] * blueprintEngine.blueprint.id
             }
-        }
-        return bestBlueprint.first * bestBlueprint.second
-    }
 
-    override fun part2(lines: List<Blueprint>): Int {
-        TODO("Not yet implemented")
-    }
+    override fun part2(lines: List<Blueprint>) =
+        lines.take(3)
+            .map { BlueprintEngine(it, 32) }
+            .fold(1) { acc, blueprintEngine ->
+                println("**** blueprint ${blueprintEngine.blueprint.id} ****")
+                val thisBest = blueprintEngine.maximizeGeode()
+                acc * thisBest.resources[GEODE]
+            }
 }

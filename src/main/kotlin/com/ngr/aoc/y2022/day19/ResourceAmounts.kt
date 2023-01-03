@@ -8,23 +8,15 @@ class ResourceAmounts(initialResources: Map<Resource, Int> = mapOf()) {
         resources[resource] = resources.orZero(resource) + n
     }
 
-    fun addAll(others: ResourceAmounts) {
-        others.resources.forEach {
-            resources[it.key] = this[it.key] + it.value
-        }
+    operator fun plusAssign(other: Pair<Resource, Int>) {
+        resources[other.first] = this[other.first] + other.second
     }
-
-    fun clear() =
-        resources.clear()
-
-    fun isNotEmpty() =
-        resources.isNotEmpty()
-
-    fun clone() =
-        ResourceAmounts(resources.toMap())
 
     operator fun get(resource: Resource) =
         resources.orZero(resource)
+
+    fun clone() =
+        ResourceAmounts(resources.toMap())
 
     override fun toString() =
         resources.toString()
