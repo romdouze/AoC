@@ -4,19 +4,8 @@ import kotlin.math.ceil
 
 data class State(
     var clock: Int = 0,
-    val collectors: ResourceAmounts = ResourceAmounts(
-        mapOf(
-            Resource.ORE to 1,
-            Resource.CLAY to 0,
-            Resource.OBSIDIAN to 0,
-            Resource.GEODE to 0
-        )
-    ),
-    val resources: ResourceAmounts = ResourceAmounts(
-        Resource.values()
-            .associateWith { 0 }
-            .toMutableMap()
-    ),
+    val collectors: ResourceAmounts = ResourceAmounts(mapOf(Resource.ORE to 1)),
+    val resources: ResourceAmounts = ResourceAmounts(),
     val purchases: MutableList<Pair<Resource, Int>> = mutableListOf(),
 ) {
     fun canAffordByWaiting(recipe: Recipe) =

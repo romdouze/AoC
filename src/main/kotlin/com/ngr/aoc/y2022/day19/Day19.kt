@@ -19,7 +19,7 @@ class Day19 : Day<Blueprint, Int, Int>() {
 
     override fun part2(lines: List<Blueprint>) =
         lines.take(3)
-            .map { BlueprintEngine(it, 32) }
+            .map { BlueprintEngine(it, 24) }
             .fold(1) { acc, blueprintEngine ->
                 println("**** blueprint ${blueprintEngine.blueprint.id} ****")
                 val thisBest = blueprintEngine.maximizeGeode()
