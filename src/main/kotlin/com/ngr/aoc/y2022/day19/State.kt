@@ -8,16 +8,19 @@ data class State(
     val resources: ResourceAmounts = ResourceAmounts(),
     val purchases: MutableList<Pair<Resource, Int>> = mutableListOf(),
 ) {
-    fun canAffordByWaiting(recipe: Recipe) =
-        recipe.cost
-            .filter { resources[it.resource] < it.amount }
-            .none { collectors[it.resource] == 0 }
+
+    fun whenCanBuy(recipe: Recipe) =
+        if (recipe.cost
+                .filter { resources[it.resource] < it.amount }
+                .any { collectors[it.resource] == 0 }
+        ) {
+            Int.MAX_VALUE
+        } else {
+            waitTime(recipe) + clock
+        }
 
     fun tryToWaitAndBuy(recipe: Recipe, timeLimit: Int) {
-        val wait = 1 +
-                (recipe.cost
-                    .filter { resources[it.resource] < it.amount }
-                    .maxOfOrNull { waitTime(it) } ?: 0)
+        val wait = 1 + waitTime(recipe)
         if (clock + wait <= timeLimit) {
             wait(wait)
             buy(recipe)
@@ -29,10 +32,19 @@ data class State(
     fun potentialResource(resource: Resource, timeLimit: Int) =
         (timeLimit - clock)
             .let { remainingTime ->
-                resources[resource] + collectors[resource] * remainingTime + remainingTime * (remainingTime + 1) / 2
+                resources[resource] + collectors[resource] * remainingTime + remainingTime * (remainingTime - 1) / 2
             }
 
-    fun buy(recipe: Recipe) {
+    fun waitUntil(timeLimit: Int) {
+        wait(timeLimit - clock)
+    }
+
+    private fun wait(time: Int) {
+        collect(time)
+        clock(time)
+    }
+
+    private fun buy(recipe: Recipe) {
         collectors += recipe.resource to 1
         purchases.add(recipe.resource to clock)
         recipe.cost
@@ -41,27 +53,23 @@ data class State(
             }
     }
 
-    fun waitUntil(timeLimit: Int) {
-        wait(timeLimit - clock)
-    }
-
-    fun wait(time: Int) {
-        collect(time)
-        clock(time)
-    }
-
-    fun collect(time: Int) {
+    private fun collect(time: Int) {
         Resource.values()
             .forEach {
                 resources.add(it, collectors[it] * time)
             }
     }
 
-    fun clock(time: Int = 1) {
+    private fun clock(time: Int = 1) {
         clock += time
     }
 
-    private fun waitTime(cost: Cost) = ceil(
+    private fun waitTime(recipe: Recipe) =
+        recipe.cost
+            .filter { resources[it.resource] < it.amount }
+            .maxOfOrNull { waitTimeCost(it) } ?: 0
+
+    private fun waitTimeCost(cost: Cost) = ceil(
         (cost.amount - resources[cost.resource]) / collectors[cost.resource].toDouble()
     ).toInt()
 

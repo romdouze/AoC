@@ -18,36 +18,52 @@ class BlueprintEngine(
         while (states.isNotEmpty()) {
             val state = states.removeFirst().clone()
 
-            blueprint.recipes
-                .filter { state.canAffordByWaiting(it) }
-                .filter { state.hasReasonToBuy(it) }
-                .forEach { recipe ->
-                    val newState = state.clone()
-                    newState.tryToWaitAndBuy(recipe, timeLimit)
-
-                    if (newState.clock >= timeLimit) {
-                        val bestGeode = mostGeodes.resources[GEODE]
-                        if (newState.potentialResource(GEODE, timeLimit) > bestGeode) {
-                            mostGeodes = newState
-                            println("new Maximum: $mostGeodes")
+            if (state.clock == timeLimit - 1) {
+                val newState = state.clone()
+                newState.waitUntil(timeLimit)
+                if (newState.resources[GEODE] > mostGeodes.resources[GEODE]) {
+                    mostGeodes = newState
+                    println("new Maximum: $mostGeodes")
+                }
+            } else {
+                val recipesToTry =
+                    blueprint.recipes
+                        .filter { it.resource == GEODE }
+                        .filter { (state.whenCanBuy(it)) == state.clock }
+                        .ifEmpty {
+                            blueprint.recipes
+                                .filter {
+                                    state.whenCanBuy(it).let { boughtAt ->
+                                        boughtAt <= timeLimit - 1
+                                    }
+                                }
+                                .filter { state.hasReasonToBuy(it) }
                         }
-                    } else {
-                        if (!states.contains(newState) &&
-                            newState.couldDoBetterThan(mostGeodes.resources[GEODE], timeLimit)
-                        ) {
-                            states.addLast(newState)
+
+                recipesToTry
+                    .forEach { recipe ->
+                        val newState = state.clone()
+                        newState.tryToWaitAndBuy(recipe, timeLimit)
+
+                        if (newState.clock >= timeLimit) {
+                            if (newState.resources[GEODE] > mostGeodes.resources[GEODE]) {
+                                mostGeodes = newState
+                                println("new Maximum: $mostGeodes")
+                            }
+                        } else {
+                            if (!states.contains(newState) &&
+                                newState.potentialResource(GEODE, timeLimit) > mostGeodes.resources[GEODE]
+                            ) {
+                                states.addLast(newState)
+                            }
                         }
                     }
-                }
+            }
+
             count++
         }
         println("count: $count")
         return mostGeodes
-    }
-
-    private fun State.couldDoBetterThan(bestGeode: Int, timeLimit: Int): Boolean {
-        val remainingTime = timeLimit - clock
-        return resources[GEODE] + collectors[GEODE] * remainingTime + remainingTime * (remainingTime + 1) / 2 > bestGeode
     }
 
     private fun State.hasReasonToBuy(recipe: Recipe): Boolean {
