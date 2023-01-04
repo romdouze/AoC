@@ -5,12 +5,19 @@ import java.io.InputStream
 
 abstract class Day<InputType, Part1OutputType, Part2OutputType> {
 
-    fun run(fileName: String): DayResult? {
-        val inputStream = object {}.javaClass.getResourceAsStream(fileName) ?: return null
+    companion object {
+        const val RUN_METHOD = "runAll"
+    }
+
+    fun runAll(fileName: String): DayResult? {
+        val inputStream = object {}.javaClass.getResourceAsStream(fileName) ?: run {
+            println("Input file not found: $fileName")
+            return null
+        }
 
         val (dataLines, readTime) = timed {
             inputStream.use {
-                readInput(inputStream)
+                readInput(it)
             }
         }
 

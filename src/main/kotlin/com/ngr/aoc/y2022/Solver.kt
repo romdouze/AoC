@@ -1,5 +1,8 @@
 package com.ngr.aoc.y2022
 
+import com.ngr.aoc.y2022.Day.Companion.RUN_METHOD
+import com.ngr.aoc.y2022.common.Constants.className
+import com.ngr.aoc.y2022.common.Constants.filename
 import com.ngr.aoc.y2022.common.print
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
@@ -7,21 +10,17 @@ import kotlin.reflect.full.functions
 object Solver {
     private const val DAY = 18
 
-    private const val PATH = "/input/2022/"
-    private const val FILENAME = "${PATH}input-$DAY.txt"
-    private const val PACKAGE = "com.ngr.aoc.y2022.day$DAY"
-
     @JvmStatic
     fun main(args: Array<String>) {
 
         println("Running day $DAY")
 
-        val classForDay = Class.forName("$PACKAGE.Day$DAY").kotlin
+        val classForDay = Class.forName(className(DAY)).kotlin
         val dayResult = classForDay.functions
-            .firstOrNull { it.name == "run" }
+            .firstOrNull { it.name == RUN_METHOD }
             ?.call(
                 classForDay.createInstance(),
-                FILENAME
+                filename(DAY)
             ) as DayResult?
 
         dayResult?.apply {
@@ -30,7 +29,4 @@ object Solver {
             println("part2: ${part2.first.print()} [${part2.second.print()}]")
         } ?: println("No result!")
     }
-
-    private fun <T> Result<T>.print() =
-        if (isSuccess) getOrNull().toString() else toString()
 }
