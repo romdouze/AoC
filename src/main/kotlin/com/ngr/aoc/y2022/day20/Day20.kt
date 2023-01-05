@@ -2,31 +2,46 @@ package com.ngr.aoc.y2022.day20
 
 import com.ngr.aoc.y2022.Day
 
-class Day20 : Day<Item, Int, Int>() {
+class Day20 : Day<Item, Long, Long>() {
+
+    private companion object {
+        private const val DECRYPTION_KEY = 811589153L
+    }
 
     private lateinit var zeroItem: Item
 
     override fun handleLine(lines: MutableList<Item>, line: String) {
-        val item = Item(line.toInt(), lines.size)
+        val item = Item(line.toLong(), lines.size)
         lines.add(item)
-        if (item.value == 0) zeroItem = item
+        if (item.value == 0L) zeroItem = item
     }
 
-    override fun part1(lines: List<Item>): Int {
-        val mixedList = CircularList(lines)
+    override fun part1(lines: List<Item>) =
+        mix(lines).extractCoordinates()
 
-        lines
+    override fun part2(lines: List<Item>) =
+        mix(lines.map { Item(it.value * DECRYPTION_KEY, it.order) }, 10)
+            .extractCoordinates()
+
+    private fun mix(items: List<Item>, iterations: Int = 1): CircularList<Item> {
+        val mixedList = CircularList(items)
+
+        items
             .sortedBy { it.order }
-            .forEach {
-                val fromIndex = mixedList.indexOf(it)
-                mixedList.move(fromIndex, fromIndex + it.value)
+            .also { sortedItems ->
+                repeat(iterations) {
+                    sortedItems.forEach {
+                        val fromIndex = mixedList.indexOf(it)
+                        mixedList.move(fromIndex, fromIndex + it.value)
+                    }
+                }
             }
 
-        val zeroPosition = mixedList.indexOf(zeroItem)
-        return mixedList[zeroPosition + 1000].value + mixedList[zeroPosition + 2000].value + mixedList[zeroPosition + 3000].value
+        return mixedList
     }
 
-    override fun part2(lines: List<Item>): Int {
-        TODO("Not yet implemented")
+    private fun CircularList<Item>.extractCoordinates(): Long {
+        val zeroPosition = indexOf(zeroItem)
+        return this[zeroPosition + 1000].value + this[zeroPosition + 2000].value + this[zeroPosition + 3000].value
     }
 }

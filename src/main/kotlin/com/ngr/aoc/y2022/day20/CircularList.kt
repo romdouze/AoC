@@ -5,23 +5,15 @@ class CircularList<T>(
 ) {
     private val items: MutableList<T> = initialItems.toMutableList()
 
-    fun move(fromIndex: Int, toIndex: Int) {
-        val actualToIndex =
-            (if (toIndex < fromIndex && toIndex <= 0) toIndex - 1
-            else if (toIndex > fromIndex && toIndex >= items.size - 1) toIndex + 1
-            else toIndex)
-                .mod(items.size)
-
-        val item = items[fromIndex]
-        add(actualToIndex + if (actualToIndex > fromIndex) 1 else 0, item)
-        items.remove(item)
+    fun move(fromIndex: Int, toIndex: Long) {
+        add(toIndex, items.removeAt(fromIndex))
     }
 
     fun indexOf(item: T) =
         items.toSet().indexOf(item)
 
-    private fun add(index: Int, value: T) {
-        items.add(index, value)
+    private fun add(index: Long, value: T) {
+        items.add(index.mod(items.size), value)
     }
 
     operator fun get(index: Int) =
