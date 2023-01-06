@@ -13,11 +13,11 @@ data class Yell(
 data class Operation(
     val left: String,
     val right: String,
-    val operation: (Long, Long) -> Long,
+    val operator: Operator,
 ) : Job {
     override fun perform(monkeys: Map<String, Monkey>) =
-        operation(
-            monkeys[left]!!.job.perform(monkeys),
-            monkeys[right]!!.job.perform(monkeys)
+        operator.operation(
+            monkeys[left]!!.performJob(monkeys),
+            monkeys[right]!!.performJob(monkeys)
         )
 }
