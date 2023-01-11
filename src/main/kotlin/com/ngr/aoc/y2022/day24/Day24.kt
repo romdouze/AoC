@@ -16,9 +16,11 @@ class Day24 : Day<String, Int, Int>() {
     private lateinit var innerHeightRange: IntRange
     private lateinit var start: Point
     private lateinit var end: Point
+    private var cycleLength: Int = Int.MAX_VALUE
 
-    private val initialBlizzards: MutableSet<Blizzard> = mutableSetOf()
     private var row = 0
+    private val initialBlizzards: MutableSet<Blizzard> = mutableSetOf()
+    private val blizzardCache: MutableMap<Int, Set<Point>> = mutableMapOf()
 
     private val allActions: List<Dir?> = Dir.values().toList() + null
 
@@ -33,18 +35,19 @@ class Day24 : Day<String, Int, Int>() {
 
     override fun part1(lines: List<String>): Int {
         initConstants(lines)
+        buildBlizzardCache(initialBlizzards)
+        println("cycleLength: $cycleLength")
 
-        val toVisit = ArrayDeque(listOf(State(Point(start), initialBlizzards.toSet(), emptyList())))
+        val toVisit = ArrayDeque(listOf(State(Point(start), emptyList(), cycleLength)))
         val visited = mutableSetOf<State>()
 
         var bestPath: State? = null
 
-        while (toVisit.isNotEmpty()) {
+        while (toVisit.isNotEmpty() && bestPath == null) {
             visited.add(toVisit.removeFirst())
             val state = visited.last().clone()
 
-            moveBlizzards(state.blizzards)
-            val allBlizzardSpots = state.blizzards.map { it.pos }.toSet()
+            val allBlizzardSpots = projectBlizzards(state.clock + 1, initialBlizzards)
 
             allActions
                 .filter { action ->
@@ -58,9 +61,9 @@ class Day24 : Day<String, Int, Int>() {
                         newState.path.size < (bestPath?.path?.size ?: Int.MAX_VALUE)
                     ) {
                         bestPath = newState
-                        println("new best bath: $bestPath")
+                        println("found best path: $bestPath")
                     } else {
-                        if (!visited.contains(newState)) {
+                        if (!toVisit.contains(newState) && !visited.contains(newState)) {
                             toVisit.add(newState)
                         }
                     }
@@ -68,6 +71,7 @@ class Day24 : Day<String, Int, Int>() {
 
         }
 
+        println("visited: ${visited.size}")
         return bestPath!!.path.size
     }
 
@@ -75,9 +79,10 @@ class Day24 : Day<String, Int, Int>() {
         TODO("Not yet implemented")
     }
 
-    private fun moveBlizzards(allBlizzards: Set<Blizzard>) {
-        allBlizzards.onEach { it.move(widthRange, heightRange) }
-    }
+    private fun projectBlizzards(clock: Int, allBlizzards: Set<Blizzard>) =
+        blizzardCache.computeIfAbsent(clock % cycleLength) {
+            allBlizzards.map { it.project(clock, innerWidthRange, innerHeightRange) }.toSet()
+        }
 
     private fun inbound(pos: Point) =
         innerWidthRange.contains(pos.x) && innerHeightRange.contains(pos.y)
@@ -89,5 +94,32 @@ class Day24 : Day<String, Int, Int>() {
         innerHeightRange = (1 until lines.size - 1)
         start = Point(lines[0].indexOfFirst { it == EMPTY }, 0)
         end = Point(lines.last().indexOfFirst { it == EMPTY }, heightRange.last)
+        cycleLength =
+            lcm(innerWidthRange.last - innerWidthRange.first + 1, innerHeightRange.last - innerHeightRange.first + 1)
+    }
+
+    private fun buildBlizzardCache(allBlizzards: Set<Blizzard>) {
+        var clock = 0
+        val blizzardPatterns = mutableMapOf<Int, Pair<Set<Blizzard>, Int>>()
+
+        while (clock < cycleLength) {
+            blizzardCache.computeIfAbsent(clock) {
+                allBlizzards.map { Blizzard(it.project(clock, innerWidthRange, innerHeightRange), it.dir) }
+                    .also {
+//                        val blizzardSet = it.toSet()
+//                        val blizzardSetHash = blizzardSet.hashCode()
+//                        if (blizzardPatterns.containsKey(blizzardSetHash)) {
+//                           val tmp1= blizzardPatterns[blizzardSetHash]!!.first.sortedWith(compareBy<Blizzard> { it.pos.x }.thenBy { it.pos.y })
+//                           val tmp2= blizzardSet.sortedWith(compareBy<Blizzard> { it.pos.x }.thenBy { it.pos.y })
+//                            println("match found at $clock from ${blizzardPatterns[blizzardSetHash]?.second}")
+//                        } else {
+//                            blizzardPatterns[blizzardSetHash] = blizzardSet to clock
+//                        }
+                    }.map { it.pos }.toSet()
+
+            }
+
+            clock++
+        }
     }
 }

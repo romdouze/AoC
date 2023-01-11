@@ -4,24 +4,29 @@ import java.awt.Point
 
 data class State(
     val location: Point,
-    val blizzards: Set<Blizzard>,
     val path: List<Point>,
+    private val cycleLength: Int,
 ) {
+
+    val clock = path.size % cycleLength
 
     override fun equals(other: Any?) =
         if (other is State) {
-            location == other.location && blizzards == other.blizzards
+            location == other.location && clock == other.clock
         } else {
             super.equals(other)
         }
 
     override fun hashCode() =
-        location.hashCode() + 31 * blizzards.hashCode()
+        location.hashCode() + 31 * clock.hashCode()
 
     fun clone(newLocation: Point? = null) =
         State(
             Point(newLocation ?: location),
-            blizzards.map { it.clone() }.toSet(),
             path.map { Point(it) } + (newLocation?.let { listOf(Point(newLocation)) } ?: emptyList()),
+            cycleLength
         )
+
+    override fun toString() =
+        "location=${location.print()}, path=${path.map { it.print() }}"
 }
