@@ -13,4 +13,10 @@ data class Blizzard(
         if (pos.y == 0) pos.y = heightRange.last - 1
         if (pos.y == heightRange.last) pos.y = 1
     }
+
+    fun clone() =
+        Blizzard(
+            Point(pos),
+            dir,
+        )
 }
