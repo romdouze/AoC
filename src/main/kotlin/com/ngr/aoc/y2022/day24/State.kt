@@ -8,25 +8,26 @@ data class State(
     private val cycleLength: Int,
 ) {
 
-    val clock = path.size % cycleLength
+    val clock = path.size
+    val cycleClock = clock % cycleLength
 
     override fun equals(other: Any?) =
         if (other is State) {
-            location == other.location && clock == other.clock
+            location == other.location && cycleClock == other.cycleClock
         } else {
             super.equals(other)
         }
 
     override fun hashCode() =
-        location.hashCode() + 31 * clock.hashCode()
+        location.hashCode() + 31 * cycleClock.hashCode()
 
     fun clone(newLocation: Point? = null) =
         State(
             Point(newLocation ?: location),
-            path.map { Point(it) } + (newLocation?.let { listOf(Point(newLocation)) } ?: emptyList()),
+            path + (newLocation?.let { listOf(Point(newLocation)) } ?: emptyList()),
             cycleLength
         )
 
     override fun toString() =
-        "location=${location.print()}, path=${path.map { it.print() }}"
+        "location=${location.print()}, clock=$clock, path=${path.map { it.print() }}"
 }

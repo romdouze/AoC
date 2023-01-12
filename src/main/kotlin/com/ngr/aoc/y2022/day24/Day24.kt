@@ -1,6 +1,7 @@
 package com.ngr.aoc.y2022.day24
 
 import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.y2022.common.timed
 import java.awt.Point
 
 class Day24 : Day<String, Int, Int>() {
@@ -35,17 +36,32 @@ class Day24 : Day<String, Int, Int>() {
 
     override fun part1(lines: List<String>): Int {
         initConstants(lines)
-        buildBlizzardCache(initialBlizzards)
+        timed("Building cache") { buildBlizzardCache(initialBlizzards) }
         println("cycleLength: $cycleLength")
 
-        val toVisit = ArrayDeque(listOf(State(Point(start), emptyList(), cycleLength)))
+        val bestPath = findBestPath(State(Point(start), emptyList(), cycleLength), start, end)
+
+        return bestPath.clock
+    }
+
+    override fun part2(lines: List<String>): Int {
+
+        val firstLeg = findBestPath(State(Point(start), emptyList(), cycleLength), start, end)
+        val secondLeg = findBestPath(firstLeg, end, start)
+        val thirdLeg = findBestPath(secondLeg, start, end)
+
+        return thirdLeg.clock
+    }
+
+    private fun findBestPath(initialState: State, start: Point, end: Point): State {
+        val toVisit = ArrayDeque(listOf(initialState))
         val visited = mutableSetOf<State>()
 
         var bestPath: State? = null
 
         while (toVisit.isNotEmpty() && bestPath == null) {
-            visited.add(toVisit.removeFirst())
-            val state = visited.last().clone()
+            val state = toVisit.removeFirst()
+            visited.add(state)
 
             val allBlizzardSpots = projectBlizzards(state.clock + 1, initialBlizzards)
 
@@ -72,11 +88,8 @@ class Day24 : Day<String, Int, Int>() {
         }
 
         println("visited: ${visited.size}")
-        return bestPath!!.path.size
-    }
 
-    override fun part2(lines: List<String>): Int {
-        TODO("Not yet implemented")
+        return bestPath!!
     }
 
     private fun projectBlizzards(clock: Int, allBlizzards: Set<Blizzard>) =
