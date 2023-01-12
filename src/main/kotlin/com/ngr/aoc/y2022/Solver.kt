@@ -8,7 +8,7 @@ import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
 
 object Solver {
-    private const val DAY = 24
+    private const val DAY = 25
 
     @JvmStatic
     fun main(args: Array<String>) {
