@@ -1,7 +1,10 @@
 package com.ngr.aoc.y2022.day22
 
-import com.ngr.aoc.y2022.Day
-import com.ngr.aoc.y2022.day22.Dir.*
+import com.ngr.aoc.Day
+import com.ngr.aoc.y2022.day22.Dir.D
+import com.ngr.aoc.y2022.day22.Dir.L
+import com.ngr.aoc.y2022.day22.Dir.R
+import com.ngr.aoc.y2022.day22.Dir.U
 import java.awt.Point
 import java.io.InputStream
 

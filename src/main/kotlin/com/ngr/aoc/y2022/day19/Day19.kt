@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day19
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 import com.ngr.aoc.y2022.day19.Resource.GEODE
 
 class Day19 : Day<Blueprint, Int, Int>() {

@@ -1,7 +1,10 @@
 package com.ngr.aoc.y2022.day23
 
-import com.ngr.aoc.y2022.Day
-import com.ngr.aoc.y2022.day23.Dir.*
+import com.ngr.aoc.Day
+import com.ngr.aoc.y2022.day23.Dir.E
+import com.ngr.aoc.y2022.day23.Dir.N
+import com.ngr.aoc.y2022.day23.Dir.S
+import com.ngr.aoc.y2022.day23.Dir.W
 import java.awt.Point
 
 class Day23 : Day<Point, Int, Int>() {

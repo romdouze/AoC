@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day20
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 
 class Day20 : Day<Item, Long, Long>() {
 

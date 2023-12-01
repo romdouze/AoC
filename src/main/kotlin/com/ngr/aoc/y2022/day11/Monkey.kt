@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day11
 
-import com.ngr.aoc.y2022.common.timed
+import com.ngr.aoc.timed
 import java.math.BigInteger
 
 class Monkey(

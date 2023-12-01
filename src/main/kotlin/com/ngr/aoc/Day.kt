@@ -1,6 +1,5 @@
-package com.ngr.aoc.y2022
+package com.ngr.aoc
 
-import com.ngr.aoc.y2022.common.timed
 import java.io.InputStream
 
 abstract class Day<InputType, Part1OutputType, Part2OutputType> {

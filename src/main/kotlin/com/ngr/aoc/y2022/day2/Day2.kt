@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day2
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 
 class Day2 : Day<String, Int, Int>() {
 

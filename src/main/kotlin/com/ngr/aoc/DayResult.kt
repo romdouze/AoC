@@ -1,4 +1,4 @@
-package com.ngr.aoc.y2022
+package com.ngr.aoc
 
 import kotlin.time.Duration
 

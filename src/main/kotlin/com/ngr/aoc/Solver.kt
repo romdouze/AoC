@@ -1,26 +1,26 @@
-package com.ngr.aoc.y2022
+package com.ngr.aoc
 
-import com.ngr.aoc.y2022.Day.Companion.RUN_METHOD
-import com.ngr.aoc.y2022.common.Constants.className
-import com.ngr.aoc.y2022.common.Constants.filename
-import com.ngr.aoc.y2022.common.print
+import com.ngr.aoc.Constants.className
+import com.ngr.aoc.Constants.filename
+import com.ngr.aoc.Day.Companion.RUN_METHOD
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
 
 object Solver {
-    private const val DAY = 25
+    private const val YEAR = 2023
+    private const val DAY = 1
 
     @JvmStatic
     fun main(args: Array<String>) {
 
-        println("Running day $DAY")
+        println("Running day $DAY/$YEAR")
 
-        val classForDay = Class.forName(className(DAY)).kotlin
+        val classForDay = Class.forName(className(DAY, YEAR)).kotlin
         val dayResult = classForDay.functions
             .firstOrNull { it.name == RUN_METHOD }
             ?.call(
                 classForDay.createInstance(),
-                filename(DAY)
+                filename(DAY, YEAR)
             ) as DayResult?
 
         dayResult?.apply {

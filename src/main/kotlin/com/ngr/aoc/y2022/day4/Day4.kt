@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day4
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 
 class Day4 : Day<Pair<IntRange, IntRange>, Int, Int>() {
     override fun handleLine(lines: MutableList<Pair<IntRange, IntRange>>, line: String) {

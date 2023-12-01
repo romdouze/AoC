@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day11
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 import com.ngr.aoc.y2022.day11.Monkey.Rules
 import java.math.BigInteger
 

@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day10
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 import kotlin.math.abs
 
 class Day10 : Day<Instruction, Int, String>() {

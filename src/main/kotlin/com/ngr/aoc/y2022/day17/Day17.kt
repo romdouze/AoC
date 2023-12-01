@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day17
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 import com.ngr.aoc.y2022.day17.Move.D
 import com.ngr.aoc.y2022.day17.Move.U
 import java.lang.Long.max

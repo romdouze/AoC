@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day15
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 import java.awt.Point
 import kotlin.math.max
 

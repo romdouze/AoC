@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day14
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 import java.awt.Point
 
 class Day14 : Day<String, Int, Int>() {

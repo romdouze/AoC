@@ -1,6 +1,6 @@
 package com.ngr.aoc.y2022.day5
 
-import com.ngr.aoc.y2022.Day
+import com.ngr.aoc.Day
 import java.io.InputStream
 
 class Day5 : Day<Operation, String, String>() {
