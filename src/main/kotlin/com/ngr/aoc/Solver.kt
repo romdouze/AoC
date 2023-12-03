@@ -8,12 +8,12 @@ import kotlin.reflect.full.functions
 
 object Solver {
     private const val YEAR = 2023
-    private const val DAY = 2
+    private const val DAY = 3
 
     @JvmStatic
     fun main(args: Array<String>) {
 
-        println("Running day $DAY/$YEAR")
+        println("Running day $DAY [$YEAR]")
 
         val classForDay = Class.forName(className(DAY, YEAR)).kotlin
         val dayResult = classForDay.functions
