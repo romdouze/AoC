@@ -1,4 +1,4 @@
-package com.ngr.aoc.y2022.day24
+package com.ngr.aoc.common
 
 fun lcm(vararg n: Int): Int {
     val x1 = n.toList()
