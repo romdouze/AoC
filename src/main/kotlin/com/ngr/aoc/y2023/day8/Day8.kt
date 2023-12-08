@@ -1,7 +1,6 @@
 package com.ngr.aoc.y2023.day8
 
 import com.ngr.aoc.Day
-import com.ngr.aoc.common.lcm
 
 class Day8 : Day<Node, Int, Long>() {
 
@@ -52,36 +51,29 @@ class Day8 : Day<Node, Int, Long>() {
     override fun part2(lines: List<Node>): Long {
         val nodeMap = lines.associateBy { it.id }
 
-        val cacheMap = lines.filter { it.id.endsWith("A") }
-            .associate { it.id to buildCache(it.id, nodeMap) }
+        val loopMap = lines.filter { it.id.endsWith("A") }
+            .map { buildLoop(it.id, nodeMap) }
 
-        var steps = 0L
+        val furthestEndpoint = loopMap.maxBy { it.endpoints.max() }
+        val targetIndex = furthestEndpoint.endpoints.max()
 
-//        var currentNodes = nodeMap.values.filter { it.id.endsWith("A") }
-//        var instructionIndex = 0
-//        var currentInstruction = instructions[instructionIndex]
-//        var steps = 0L
-//
-//        while (currentNodes.any { !it.id.endsWith("Z") }) {
-//            currentNodes = currentNodes.map {
-//                when (currentInstruction) {
-//                    'R' -> nodeMap[it.right]!!
-//                    'L' -> nodeMap[it.left]!!
-//                    else -> throw IllegalArgumentException("Invalid instruction [$currentInstruction]")
-//                }
-//            }
-//            instructionIndex = (instructionIndex + 1) % instructions.length
-//            currentInstruction = instructions[instructionIndex]
-//            steps++
-//            if (steps % 1000000L == 0L){
-//                println(steps)
-//            }
-//        }
+        var loopCount = 1
+        var currentIndex = targetIndex.toLong()
 
-        return lcm(*cacheMap.values.map { it.first.size - it.second }.toIntArray()).toLong()
+        while (loopMap.any {
+                !it.endpoints.contains(
+                    ((currentIndex - it.offset) % it.length + it.offset).toInt()
+                )
+            }) {
+
+            loopCount++
+            currentIndex += furthestEndpoint.length
+        }
+
+        return currentIndex
     }
 
-    private fun buildCache(node: String, nodeMap: Map<String, Node>): Pair<Set<Pair<String, Int>>, Int> {
+    private fun buildLoop(node: String, nodeMap: Map<String, Node>): Loop {
         var currentNode = nodeMap[node]!!
         var instructionIndex = 0
         var currentInstruction = instructions[instructionIndex]
@@ -99,7 +91,17 @@ class Day8 : Day<Node, Int, Long>() {
             currentInstruction = instructions[instructionIndex]
             steps++
         }
+        val cacheList = cache.toList()
+        val loopOffset = cacheList.indexOf(currentNode.id to instructionIndex)
 
-        return cache to cache.indexOf(currentNode.id to instructionIndex)
+        return Loop(
+            offset = loopOffset,
+            length = cache.size - loopOffset,
+            endpoints = cache.toList()
+                .mapIndexed { index, pair ->
+                    pair.first to index
+                }.filter { it.first.endsWith("Z") }
+                .map { it.second },
+        )
     }
 }

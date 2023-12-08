@@ -5,3 +5,9 @@ data class Node(
     val left: String,
     val right: String,
 )
+
+data class Loop(
+    val offset: Int,
+    val length: Int,
+    val endpoints: List<Int>,
+)
