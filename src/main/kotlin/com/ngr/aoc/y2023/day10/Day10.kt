@@ -44,13 +44,16 @@ class Day10 : Day<String, Int, Int>() {
 
         val queue = ArrayDeque(listOf(Point(-1, -1)))
 
-        val loopDirection = loop.filter { it.turn != null }.maxOf { it.turn!! }
+        val loopDirection = loop.filter { it.turn != null }.groupBy { it.turn!! }
+            .maxBy { it.value.size }.key
         val sidesToVisit = when (loopDirection) {
             RIGHT -> loop.flatMap { it.sides.second }.toSet()
             LEFT -> loop.flatMap { it.sides.first }.toSet()
             else -> throw IllegalArgumentException("Loop should not be turning $loopDirection")
-        }.filter { !loopPoints.contains(it) }
+        }.filter { !loopPoints.contains(it) }.toSet()
 
+        inside.remove(start)
+        inside.removeAll(sidesToVisit)
         queue.addAll(sidesToVisit)
 
         while (queue.isNotEmpty()) {
