@@ -5,47 +5,41 @@ data class SpringRow(
     val groups: List<Int>,
 ) {
 
-    private companion object {
-        private val combinationCache = mutableMapOf<Pair<Int, Int>, List<List<Int>>>()
+    private val cache = mutableMapOf<Pair<Int, Int>, Long>()
 
-        private fun enumerate(indices: List<Int>, k: Int): List<List<Int>> {
-            return if (k == 1) {
-                (0 until indices.size - k + 1).map { i ->
-                    listOf(indices[i])
-                }
-            } else {
-                (0 until indices.size - k + 1).flatMap { i ->
-                    enumerate(indices.drop(i + 1), k - 1).map {
-                        listOf(indices[i]).plus(it)
-                    }
-                }
-            }
+    fun enumerate() =
+        enumerate(0, 0)
+
+    private fun enumerate(i: Int, j: Int): Long {
+        if (j > groups.lastIndex) {
+            return if (i < record.length && record.substring(i).any { it == '#' }) 0 else 1
         }
 
-        private fun combinations(n: Int, k: Int) =
-            combinationCache.computeIfAbsent(n to k) {
-                enumerate((0 until n).toList(), k)
-            }
+        val nextI = (i until record.length).firstOrNull { record[it] in arrayOf('#', '?') }
+
+        if (nextI == null) {
+            return 0
+        }
+
+        if (cache.containsKey(nextI to j)) {
+            return cache[nextI to j]!!
+        }
+
+        var count = 0L
+        if (canPlace(nextI, j)) {
+            count += enumerate(nextI + groups[j] + 1, j + 1)
+        }
+        if (record[nextI] == '?') {
+            count += enumerate(nextI + 1, j)
+        }
+
+        cache[nextI to j] = count
+
+        return cache[nextI to j]!!
     }
 
-    fun enumerate(): Int {
-        val combinations = combinations(record.length - groups.sum() + 1, groups.size)
-        return combinations.count { canBePlaced(it) }
-    }
-
-    private fun canBePlaced(combination: List<Int>): Boolean {
-        val line = (0 until record.length - groups.sum() + 1)
-            .mapIndexed { index, _ ->
-                val blockIndex = combination.indexOf(index)
-                if (blockIndex != -1) {
-                    val blockSize = groups[blockIndex]!!
-                    "#".repeat(blockSize) + "."
-                } else {
-                    "."
-                }
-            }.joinToString("") { it }
-            .dropLast(1)
-
-        return line.indices.none { line[it] == '.' && record[it] == '#' || line[it] == '#' && record[it] == '.' }
-    }
+    private fun canPlace(i: Int, j: Int) =
+        i + groups.subList(j, groups.size).sum() + (groups.size - j - 1) <= record.length &&
+                record.substring(i, i + groups[j]).none { it == '.' } &&
+                (i + groups[j] >= record.length || record[i + groups[j]] != '#')
 }

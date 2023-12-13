@@ -2,7 +2,7 @@ package com.ngr.aoc.y2023.day12
 
 import com.ngr.aoc.Day
 
-class Day12 : Day<SpringRow, Int, Int>() {
+class Day12 : Day<SpringRow, Long, Long>() {
     override fun handleLine(lines: MutableList<SpringRow>, line: String) {
         lines.add(
             line.split(" ").let {
