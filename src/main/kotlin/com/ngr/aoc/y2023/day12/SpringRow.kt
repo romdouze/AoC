@@ -5,42 +5,47 @@ data class SpringRow(
     val groups: List<Int>,
 ) {
 
-    private val cache = mutableMapOf<Pair<Int, Int>, Int>()
+    private companion object {
+        private val combinationCache = mutableMapOf<Pair<Int, Int>, List<List<Int>>>()
 
-    fun enumerate() =
-        enumerate(record.length - 1, groups.size - 1)
-
-    private fun enumerate(i: Int, j: Int): Int {
-        if (i < 0 || j < 0) {
-            return 0
-        }
-        if (i == 0 && j == 0) {
-            return 1
-        }
-        if (cache.containsKey(i to j)) {
-            return cache[i to j]!!
-        }
-
-        cache[i to j] = 0
-        val whiteCount = enumerate(i - 1, j)
-        val blackCount = enumerate(i - groups[j] - extra(j), j - 1)
-
-        if (whiteCount > 0 && record[i] != '#') {
-            cache[i to j] = cache[i to j]!! + whiteCount
-        }
-        if (blackCount > 0 && canPlace(i, j)) {
-            cache[i to j] = cache[i to j]!! + blackCount
+        private fun enumerate(indices: List<Int>, k: Int): List<List<Int>> {
+            return if (k == 1) {
+                (0 until indices.size - k + 1).map { i ->
+                    listOf(indices[i])
+                }
+            } else {
+                (0 until indices.size - k + 1).flatMap { i ->
+                    enumerate(indices.drop(i + 1), k - 1).map {
+                        listOf(indices[i]).plus(it)
+                    }
+                }
+            }
         }
 
-        return cache[i to j]!!
+        private fun combinations(n: Int, k: Int) =
+            combinationCache.computeIfAbsent(n to k) {
+                enumerate((0 until n).toList(), k)
+            }
     }
 
-    private fun canPlace(i: Int, j: Int): Boolean {
-        (i - groups[j] + 1..i).forEach {
-            if (record[it] == '.') return false
-        }
-        return !(extra(j) == 1 && record[i - groups[j]] == '#')
+    fun enumerate(): Int {
+        val combinations = combinations(record.length - groups.sum() + 1, groups.size)
+        return combinations.count { canBePlaced(it) }
     }
 
-    private fun extra(j: Int) = if (j > 0) 1 else 0
+    private fun canBePlaced(combination: List<Int>): Boolean {
+        val line = (0 until record.length - groups.sum() + 1)
+            .mapIndexed { index, _ ->
+                val blockIndex = combination.indexOf(index)
+                if (blockIndex != -1) {
+                    val blockSize = groups[blockIndex]!!
+                    "#".repeat(blockSize) + "."
+                } else {
+                    "."
+                }
+            }.joinToString("") { it }
+            .dropLast(1)
+
+        return line.indices.none { line[it] == '.' && record[it] == '#' || line[it] == '#' && record[it] == '.' }
+    }
 }
