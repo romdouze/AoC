@@ -38,6 +38,23 @@ class Day19 : Day<Item, Int, Long>() {
             .first.sumOf { it.x + it.m + it.a + it.s }
 
     override fun part2(lines: List<Item>): Long {
-        TODO("Not yet implemented")
+        val baseRange = (1..4000)
+        val startRange = ItemRange(
+            baseRange,
+            baseRange,
+            baseRange,
+            baseRange,
+        )
+
+        val itemRanges = mutableListOf<ItemRange>()
+
+        workflows.values.filter { it.outcomes.any { it is A } }
+            .forEach {
+
+            }
+
+        return itemRanges.sumOf {
+            it.xRange.count().toLong() * it.xRange.count() * it.xRange.count() * it.xRange.count()
+        }
     }
 }

@@ -1,5 +1,8 @@
 package com.ngr.aoc.y2023.day19
 
+import kotlin.math.max
+import kotlin.math.min
+
 
 data class Item(
     val x: Int,
@@ -27,6 +30,9 @@ data class Workflow(
     val rules: List<Pair<Condition, Outcome>>,
     val default: Outcome,
 ) {
+
+    val outcomes = rules.map { it.second } + default
+
     companion object {
         private val WORKFLOW_PATTERN = "(?<name>\\w+)\\{(?<rules>.+)}".toRegex()
 
@@ -48,6 +54,8 @@ data class Workflow(
         rules.firstOrNull { it.first.applies(item) }
             ?.second?.apply(item, workflows)
             ?: default.apply(item, workflows)
+
+
 }
 
 data class Condition(
@@ -83,6 +91,42 @@ data class Condition(
                 Operator.LT -> it < value
             }
         }
+
+    fun restrictToApply(itemRange: ItemRange): ItemRange {
+        var (xRange, mRange, aRange, sRange) = itemRange
+
+        when (fieldSelector) {
+            Item::x -> xRange = restrictToApply(xRange)
+            Item::m -> mRange = restrictToApply(mRange)
+            Item::a -> aRange = restrictToApply(aRange)
+            Item::s -> sRange = restrictToApply(sRange)
+        }
+        return ItemRange(xRange, mRange, aRange, sRange)
+    }
+
+    fun restrictToExclude(itemRange: ItemRange): ItemRange {
+        var (xRange, mRange, aRange, sRange) = itemRange
+
+        when (fieldSelector) {
+            Item::x -> xRange = restrictToExclude(xRange)
+            Item::m -> mRange = restrictToExclude(mRange)
+            Item::a -> aRange = restrictToExclude(aRange)
+            Item::s -> sRange = restrictToExclude(sRange)
+        }
+        return ItemRange(xRange, mRange, aRange, sRange)
+    }
+
+    private fun restrictToApply(range: IntRange) =
+        when (operator) {
+            Operator.GT -> (max(value + 1, range.first)..range.last)
+            Operator.LT -> (range.first..min(value - 1, range.last))
+        }
+
+    private fun restrictToExclude(range: IntRange) =
+        when (operator) {
+            Operator.GT -> (range.first..min(value, range.last))
+            Operator.LT -> (max(value, range.first)..range.last)
+        }
 }
 
 abstract class Outcome {
@@ -90,8 +134,8 @@ abstract class Outcome {
     companion object {
         fun fromString(string: String) =
             when (string) {
-                "A" -> A()
-                "R" -> R()
+                "A" -> A
+                "R" -> R
                 else -> Send(string)
             }
     }
@@ -99,11 +143,11 @@ abstract class Outcome {
     abstract fun apply(item: Item, workflows: Map<String, Workflow>): Boolean
 }
 
-class A : Outcome() {
+object A : Outcome() {
     override fun apply(item: Item, workflows: Map<String, Workflow>) = true
 }
 
-class R : Outcome() {
+object R : Outcome() {
     override fun apply(item: Item, workflows: Map<String, Workflow>) = false
 }
 
@@ -122,3 +166,10 @@ enum class Operator(val label: String) {
             values().first { it.label == string }
     }
 }
+
+data class ItemRange(
+    val xRange: IntRange,
+    val mRange: IntRange,
+    val aRange: IntRange,
+    val sRange: IntRange,
+)
