@@ -30,9 +30,6 @@ data class Workflow(
     val rules: List<Pair<Condition, Outcome>>,
     val default: Outcome,
 ) {
-
-    val outcomes = rules.map { it.second } + default
-
     companion object {
         private val WORKFLOW_PATTERN = "(?<name>\\w+)\\{(?<rules>.+)}".toRegex()
 
@@ -55,7 +52,26 @@ data class Workflow(
             ?.second?.apply(item, workflows)
             ?: default.apply(item, workflows)
 
+    fun apply(itemRange: ItemRange, workflows: Map<String, Workflow>): List<Pair<ItemRange, Boolean>> {
+        val outcomes = mutableListOf<Pair<ItemRange, Boolean>>()
+        var remainingRange = itemRange
+        var ruleIndex = 0
+        while (ruleIndex < rules.size && remainingRange.isNotEmpty()) {
+            if (rules[ruleIndex].first.applies(remainingRange)) {
+                val (condition, outcome) = rules[ruleIndex]
+                val restrictedRange = condition.restrictToApply(remainingRange)
+                outcomes.addAll(outcome.apply(restrictedRange, workflows))
+                remainingRange -= restrictedRange
+            }
+            ruleIndex++
+        }
 
+        if (remainingRange.isNotEmpty()) {
+            outcomes.addAll(default.apply(remainingRange, workflows))
+        }
+
+        return outcomes
+    }
 }
 
 data class Condition(
@@ -92,6 +108,20 @@ data class Condition(
             }
         }
 
+    fun applies(itemRange: ItemRange) =
+        when (fieldSelector) {
+            Item::x -> itemRange.xRange
+            Item::m -> itemRange.mRange
+            Item::a -> itemRange.aRange
+            Item::s -> itemRange.sRange
+            else -> error("fieldSelector is invalid")
+        }.let { range ->
+            when (operator) {
+                Operator.GT -> (range.first - 1..range.last - 1).contains(value)
+                Operator.LT -> (range.first + 1..range.last + 1).contains(value)
+            }
+        }
+
     fun restrictToApply(itemRange: ItemRange): ItemRange {
         var (xRange, mRange, aRange, sRange) = itemRange
 
@@ -104,29 +134,14 @@ data class Condition(
         return ItemRange(xRange, mRange, aRange, sRange)
     }
 
-    fun restrictToExclude(itemRange: ItemRange): ItemRange {
-        var (xRange, mRange, aRange, sRange) = itemRange
-
-        when (fieldSelector) {
-            Item::x -> xRange = restrictToExclude(xRange)
-            Item::m -> mRange = restrictToExclude(mRange)
-            Item::a -> aRange = restrictToExclude(aRange)
-            Item::s -> sRange = restrictToExclude(sRange)
-        }
-        return ItemRange(xRange, mRange, aRange, sRange)
-    }
-
     private fun restrictToApply(range: IntRange) =
         when (operator) {
             Operator.GT -> (max(value + 1, range.first)..range.last)
             Operator.LT -> (range.first..min(value - 1, range.last))
         }
 
-    private fun restrictToExclude(range: IntRange) =
-        when (operator) {
-            Operator.GT -> (range.first..min(value, range.last))
-            Operator.LT -> (max(value, range.first)..range.last)
-        }
+    override fun toString() =
+        "${extractFieldName(fieldSelector.toString())}${operator.label}$value"
 }
 
 abstract class Outcome {
@@ -141,14 +156,21 @@ abstract class Outcome {
     }
 
     abstract fun apply(item: Item, workflows: Map<String, Workflow>): Boolean
+    abstract fun apply(itemRange: ItemRange, workflows: Map<String, Workflow>): List<Pair<ItemRange, Boolean>>
 }
 
 object A : Outcome() {
     override fun apply(item: Item, workflows: Map<String, Workflow>) = true
+    override fun apply(itemRange: ItemRange, workflows: Map<String, Workflow>) = listOf(itemRange to true)
+
+    override fun toString() = "-> A"
 }
 
 object R : Outcome() {
     override fun apply(item: Item, workflows: Map<String, Workflow>) = false
+    override fun apply(itemRange: ItemRange, workflows: Map<String, Workflow>) = listOf(itemRange to false)
+
+    override fun toString() = "-> R"
 }
 
 class Send(
@@ -156,6 +178,12 @@ class Send(
 ) : Outcome() {
     override fun apply(item: Item, workflows: Map<String, Workflow>) =
         workflows[target]!!.apply(item, workflows)
+
+    override fun apply(itemRange: ItemRange, workflows: Map<String, Workflow>) =
+        workflows[target]!!.apply(itemRange, workflows)
+
+    override fun toString() =
+        "-> $target"
 }
 
 enum class Operator(val label: String) {
@@ -172,4 +200,24 @@ data class ItemRange(
     val mRange: IntRange,
     val aRange: IntRange,
     val sRange: IntRange,
-)
+) {
+    operator fun minus(other: ItemRange) =
+        ItemRange(
+            xRange - other.xRange,
+            mRange - other.mRange,
+            aRange - other.aRange,
+            sRange - other.sRange,
+        )
+
+    fun isNotEmpty() =
+        listOf(xRange, mRange, aRange, sRange).any { !it.isEmpty() }
+}
+
+operator fun IntRange.minus(other: IntRange) =
+    subtract(other)
+        .takeIf { it.isNotEmpty() }
+        ?.let { (it.min()..it.max()) }
+        ?: this
+
+fun extractFieldName(string: String) =
+    string.removePrefix("val com.ngr.aoc.y2023.day19.Item.").first().toString()

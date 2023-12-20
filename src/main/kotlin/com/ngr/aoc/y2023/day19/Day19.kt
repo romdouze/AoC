@@ -34,8 +34,8 @@ class Day19 : Day<Item, Int, Long>() {
     }
 
     override fun part1(lines: List<Item>) =
-        lines.partition { workflows["in"]!!.apply(it, workflows) }
-            .first.sumOf { it.x + it.m + it.a + it.s }
+        lines.filter { workflows["in"]!!.apply(it, workflows) }
+            .sumOf { it.x + it.m + it.a + it.s }
 
     override fun part2(lines: List<Item>): Long {
         val baseRange = (1..4000)
@@ -46,15 +46,12 @@ class Day19 : Day<Item, Int, Long>() {
             baseRange,
         )
 
-        val itemRanges = mutableListOf<ItemRange>()
+        val itemRanges = workflows["in"]!!.apply(startRange, workflows)
 
-        workflows.values.filter { it.outcomes.any { it is A } }
-            .forEach {
-
+        return itemRanges.filter { it.second }
+            .map { it.first }
+            .sumOf {
+                it.xRange.count().toLong() * it.mRange.count() * it.aRange.count() * it.sRange.count()
             }
-
-        return itemRanges.sumOf {
-            it.xRange.count().toLong() * it.xRange.count() * it.xRange.count() * it.xRange.count()
-        }
     }
 }
