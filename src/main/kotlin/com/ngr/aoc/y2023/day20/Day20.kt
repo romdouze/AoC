@@ -1,6 +1,7 @@
 package com.ngr.aoc.y2023.day20
 
 import com.ngr.aoc.Day
+import com.ngr.aoc.y2023.day20.Pulse.HIGH
 import com.ngr.aoc.y2023.day20.Pulse.LOW
 
 class Day20 : Day<Module, Long, Long>() {
@@ -35,25 +36,40 @@ class Day20 : Day<Module, Long, Long>() {
         initMemories(lines)
         val modules = lines.associateBy { it.name }
 
+        val rxFeeders = modules.values.filter { it.destinations.contains("dg") }
+            .map { it.name }.associateWith { 0L to 0L }
+            .toMutableMap()
         val signals = ArrayDeque<Signal>()
-        var lowToRx = false
         var count = 0L
 
-        while (!lowToRx) {
+        while (rxFeeders.values.any { it.first == 0L || it.second == 0L }) {
             signals.add(Signal("button", "broadcaster", LOW))
+            val allSignals = mutableListOf<Signal>()
             while (signals.isNotEmpty()) {
                 val signal = signals.removeFirst()
+                allSignals.add(signal)
                 val outSignals = modules[signal.target]?.accept(signal) ?: emptyList()
                 signals.addAll(outSignals)
-                outSignals.filter { it.target == "rx" }.forEach {
-                    if (count % 1000000L == 0L) println("$count -> $it")
-                    lowToRx = lowToRx || it.pulse == LOW
-                }
             }
             count++
+            val highsToRx = allSignals.filter { rxFeeders.containsKey(it.source) && it.pulse == HIGH }
+            if (highsToRx.isNotEmpty()) {
+                highsToRx.filter { rxFeeders[it.source]!!.let { it.first == 0L || it.second == 0L } }
+                    .forEach {
+                        println("[$count] => $it")
+                        if (rxFeeders[it.source]!!.first == 0L) {
+                            rxFeeders[it.source] = count to 0L
+                        } else {
+                            rxFeeders[it.source] = rxFeeders[it.source]!!.first to count
+                        }
+
+                    }
+            }
         }
 
-        return count
+        println(rxFeeders)
+
+        return rxFeeders.values.fold(1) { acc, c -> acc * (c.second - c.first) }
     }
 
     private fun initMemories(modules: List<Module>) {
