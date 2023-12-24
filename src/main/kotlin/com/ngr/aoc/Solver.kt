@@ -8,7 +8,7 @@ import kotlin.reflect.full.functions
 
 object Solver {
     private const val YEAR = 2023
-    private const val DAY = 23
+    private const val DAY = 24
 
     @JvmStatic
     fun main(args: Array<String>) {
