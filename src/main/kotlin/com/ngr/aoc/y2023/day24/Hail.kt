@@ -1,14 +1,14 @@
 package com.ngr.aoc.y2023.day24
 
+import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 import kotlin.math.sign
 
 data class HailStone(
     val pos: Point3D,
     val v: Point3D,
 ) {
-
-    private val pos2 = pos + v
-
     private val m2D = v.y / v.x
 
     // m(x - x1) = (y - y1)
@@ -45,12 +45,16 @@ data class HailStone(
                 )
             }
 
-    fun posAt(t: Double) =
-        pos + (v * t)
-
     fun inFuture2D(point: Point3D) =
         v.x.sign == (point.x - pos.x).sign &&
                 v.y.sign == (point.y - pos.y).sign
+
+    fun posAt(t: Long) =
+        Point3D(
+            pos.x * t,
+            pos.y * t,
+            pos.z * t,
+        )
 
 }
 
@@ -84,3 +88,51 @@ data class Point3D(
     operator fun times(t: Double) =
         Point3D(x * t, y * t, z * t)
 }
+
+class Factors(val a: BigDecimal) {
+
+    private var v = a
+    private val factors = mutableListOf(BigDecimal.ONE)
+
+    private val mc = MathContext(20, RoundingMode.FLOOR)
+
+    fun factors(): List<BigDecimal> {
+        addFactorPows(BigDecimal("2.0"))
+        var s = v.sqrt(mc)
+
+        IntProgression.fromClosedRange(3, s.toInt(), 2)
+            .forEach {
+                if (addFactorPows(it.toBigDecimal())) {
+                    s = v.sqrt(mc)
+                }
+            }
+
+        if (v.compareTo(BigDecimal.ONE) != 0) {
+            addFactorPows(v)
+        }
+
+        return factors.sorted()
+    }
+
+    private fun addFactors(fs: List<BigDecimal>) {
+        factors.addAll(fs.flatMap { f -> factors.map { (f * it).setScale(0) } })
+    }
+
+    private fun addFactorPows(f: BigDecimal): Boolean {
+        var p = BigDecimal.ONE
+        val pows = mutableListOf<BigDecimal>()
+        while ((v % f).compareTo(BigDecimal.ZERO) == 0) {
+            v /= f
+            p *= f
+            pows.add(p)
+        }
+        addFactors(pows)
+        return pows.isNotEmpty()
+    }
+}
+
+fun commonFactors(a: BigDecimal, b: BigDecimal) =
+    Factors(gcd(a, b)).factors()
+
+private fun gcd(a: BigDecimal, b: BigDecimal): BigDecimal =
+    if (a > BigDecimal.ZERO) gcd(b % a, a) else b
