@@ -1,9 +1,8 @@
 package com.ngr.aoc.y2023.day24
 
-import java.math.BigDecimal
-import java.math.MathContext
-import java.math.RoundingMode
+import kotlin.math.floor
 import kotlin.math.sign
+import kotlin.math.sqrt
 
 data class HailStone(
     val pos: Point3D,
@@ -89,39 +88,37 @@ data class Point3D(
         Point3D(x * t, y * t, z * t)
 }
 
-class Factors(val a: BigDecimal) {
+class Factors(val a: Double) {
 
     private var v = a
-    private val factors = mutableListOf(BigDecimal.ONE)
+    private val factors = mutableListOf(1.0)
 
-    private val mc = MathContext(20, RoundingMode.FLOOR)
-
-    fun factors(): List<BigDecimal> {
-        addFactorPows(BigDecimal("2.0"))
-        var s = v.sqrt(mc)
+    fun factors(): List<Double> {
+        addFactorPows(2.0)
+        var s = floor(sqrt(v))
 
         IntProgression.fromClosedRange(3, s.toInt(), 2)
             .forEach {
-                if (addFactorPows(it.toBigDecimal())) {
-                    s = v.sqrt(mc)
+                if (addFactorPows(it.toDouble())) {
+                    s = floor(sqrt(v))
                 }
             }
 
-        if (v.compareTo(BigDecimal.ONE) != 0) {
+        if (v != 1.0) {
             addFactorPows(v)
         }
 
         return factors.sorted()
     }
 
-    private fun addFactors(fs: List<BigDecimal>) {
-        factors.addAll(fs.flatMap { f -> factors.map { (f * it).setScale(0) } })
+    private fun addFactors(fs: List<Double>) {
+        factors.addAll(fs.flatMap { f -> factors.map { f * it } })
     }
 
-    private fun addFactorPows(f: BigDecimal): Boolean {
-        var p = BigDecimal.ONE
-        val pows = mutableListOf<BigDecimal>()
-        while ((v % f).compareTo(BigDecimal.ZERO) == 0) {
+    private fun addFactorPows(f: Double): Boolean {
+        var p = 1.0
+        val pows = mutableListOf<Double>()
+        while (v % f == 0.0) {
             v /= f
             p *= f
             pows.add(p)
@@ -131,8 +128,8 @@ class Factors(val a: BigDecimal) {
     }
 }
 
-fun commonFactors(a: BigDecimal, b: BigDecimal) =
+fun commonFactors(a: Double, b: Double) =
     Factors(gcd(a, b)).factors()
 
-private fun gcd(a: BigDecimal, b: BigDecimal): BigDecimal =
-    if (a > BigDecimal.ZERO) gcd(b % a, a) else b
+private fun gcd(a: Double, b: Double): Double =
+    if (a > 0.0) gcd(b % a, a) else b
