@@ -1,5 +1,5 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.7.21'
+    id 'org.jetbrains.kotlin.jvm' version '2.1.0'
     id 'java'
 }
 
@@ -8,7 +8,6 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
-    mavenCentral()
 }
 
 sourceSets.main {
@@ -16,8 +15,8 @@ sourceSets.main {
 }
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.7.20"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0"
     implementation "org.apache.commons:commons-text:1.11.0"
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

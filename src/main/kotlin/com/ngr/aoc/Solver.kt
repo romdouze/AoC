@@ -3,6 +3,7 @@ package com.ngr.aoc
 import com.ngr.aoc.Constants.className
 import com.ngr.aoc.Constants.filename
 import com.ngr.aoc.Day.Companion.RUN_METHOD
+import kotlinx.coroutines.runBlocking
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.functions
 
@@ -23,10 +24,20 @@ object Solver {
                 filename(DAY, YEAR)
             ) as DayResult?
 
-        dayResult?.apply {
-            println("input read time: ${inputReadTime.print()}")
-            println("part1: ${part1.first.print()} [${part1.second.print()}]")
-            println("part2: ${part2.first.print()} [${part2.second.print()}]")
-        } ?: println("No result!")
+        timed {
+            runBlocking {
+                dayResult?.apply {
+                    println("input read time: ${inputReadTime.print()}")
+                    part1.await()
+                        .also {
+                            println("part1: ${it.first.print()} [${it.second.print()}]")
+                        }
+                    part2.await()
+                        .also {
+                            println("part2: ${it.first.print()} [${it.second.print()}]")
+                        }
+                }
+            } ?: println("No result!")
+        }.also { println("Total running time: ${it.second.print()}") }
     }
 }

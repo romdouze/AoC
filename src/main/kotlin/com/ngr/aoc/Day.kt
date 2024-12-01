@@ -1,5 +1,7 @@
 package com.ngr.aoc
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import java.io.InputStream
 
 abstract class Day<InputType, Part1OutputType, Part2OutputType> {
@@ -20,11 +22,14 @@ abstract class Day<InputType, Part1OutputType, Part2OutputType> {
             }
         }
 
-
         return DayResult(
             readTime,
-            timed { handleResult { part1(dataLines) } },
-            timed { handleResult { part2(dataLines) } },
+            GlobalScope.async {
+                timed { handleResult { part1(dataLines) } }
+            },
+            GlobalScope.async {
+                timed { handleResult { part2(dataLines) } }
+            },
         )
     }
 
