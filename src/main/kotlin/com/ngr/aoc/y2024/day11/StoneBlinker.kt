@@ -2,71 +2,30 @@ package com.ngr.aoc.y2024.day11
 
 class StoneBlinker(private val initialStones: List<Long>) {
 
-    private val blinkCache = mutableMapOf<Long, List<Long>>()
-
-    fun blink(n: Int): List<Long> {
-        var stones = initialStones
+    fun blink(n: Int): Long {
+        var stones = initialStones.fold(mutableMapOf<Long, Long>()) { stones, stone ->
+            stones.addNb(stone, 1)
+            stones
+        }
         repeat(n) {
-            val newStones = mutableListOf<Long>()
+            val newStones = mutableMapOf<Long, Long>()
             stones.forEach {
+                val stone = it.key
+                val nb = it.value
                 when {
-                    it == 0L -> newStones.add(1L)
-                    it.hasEvenDigits -> newStones.addAll(it.split())
-                    else -> newStones.add(it * 2024)
+                    stone == 0L -> newStones.addNb(1, nb)
+                    stone.hasEvenDigits -> stone.split().also {
+                        newStones.addNb(it[0], nb)
+                        newStones.addNb(it[1], nb)
+                    }
+
+                    else -> newStones.addNb(stone * 2024, nb)
                 }
             }
             stones = newStones
         }
 
-        return stones
-    }
-
-    fun blinkBetter(n: Int): Long {
-        return initialStones.sumOf { blink(it, 0, n) }
-    }
-
-    private fun blink(stone: Long, currentBlink: Int, blinks: Int): Long =
-        if (currentBlink == blinks) {
-            1L
-        } else {
-            if (blinkCache.containsKey(stone)) {
-                exploreCache(stone, currentBlink, blinks)
-            } else {
-                when {
-                    stone == 0L -> {
-                        blinkCache[stone] = listOf(1L)
-                        blink(1L, currentBlink + 1, blinks)
-                    }
-
-                    stone.hasEvenDigits -> stone.split()
-                        .also { blinkCache[stone] = it }
-                        .let {
-                            blink(it[0], currentBlink + 1, blinks) +
-                                    blink(it[1], currentBlink + 1, blinks)
-                        }
-
-                    else -> {
-                        blinkCache[stone] = listOf(stone * 2024)
-                        blink(stone * 2024, currentBlink + 1, blinks)
-                    }
-                }
-            }
-        }
-
-    private fun exploreCache(stone: Long, currentBlink: Int, blinks: Int): Long {
-        var b = currentBlink
-        var stones = listOf(stone)
-        val missing = mutableListOf<Pair<Long, Int>>()
-        while (b < blinks) {
-            stones = stones.flatMap { s ->
-                blinkCache[s] ?: let {
-                    missing.add(s to b)
-                    emptyList()
-                }
-            }
-            b++
-        }
-        return stones.size.toLong() + missing.sumOf { blink(it.first, it.second, blinks) }
+        return stones.values.sumOf { it }
     }
 
     private val Long.hasEvenDigits: Boolean
@@ -76,4 +35,8 @@ class StoneBlinker(private val initialStones: List<Long>) {
         toString().let {
             it.chunked(it.length / 2)
         }.map { it.toLong() }
+
+    private fun MutableMap<Long, Long>.addNb(stone: Long, nb: Long) {
+        this[stone] = this[stone]?.plus(nb) ?: nb
+    }
 }
