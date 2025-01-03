@@ -9,7 +9,7 @@ import kotlin.reflect.full.functions
 
 object Solver {
     private const val YEAR = 2024
-    private const val DAY = 13
+    private const val DAY = 14
 
     @JvmStatic
     fun main(args: Array<String>) {
