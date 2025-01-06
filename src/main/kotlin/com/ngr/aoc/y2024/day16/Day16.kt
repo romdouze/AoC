@@ -26,10 +26,13 @@ class Day16 : Day<String, Int, Int>() {
 
     override fun part1(lines: List<String>) =
         Maze(walls, start, end)
-            .shortestPathsToEnd()
+            .bestPathsToEnd()
             .first().score
 
-    override fun part2(lines: List<String>): Int {
-        TODO("Not yet implemented")
-    }
+    override fun part2(lines: List<String>) =
+        Maze(walls, start, end)
+            .bestPathsToEnd()
+            .flatMap { it.poses }
+            .map { it.p }.toSet()
+            .count()
 }
