@@ -13,22 +13,21 @@ class Day16 : Day<String, Int, Int>() {
     private lateinit var end: Point
 
     override fun handleLine(lines: MutableList<String>, line: String) {
-        lines.forEachIndexed { x, c ->
-            if (c == "#") {
-                walls.add(Point(x, HEIGHT))
-            } else if (c == "S") {
-                start = Point(x, HEIGHT)
-            } else if (c == "E") {
-                end = Point(x, HEIGHT)
+        line.forEachIndexed { x, c ->
+            when (c) {
+                '#' -> walls.add(Point(x, HEIGHT))
+                'S' -> start = Point(x, HEIGHT)
+                'E' -> end = Point(x, HEIGHT)
             }
         }
         WIDTH = line.length
         HEIGHT++
     }
 
-    override fun part1(lines: List<String>): Int {
-        TODO("Not yet implemented")
-    }
+    override fun part1(lines: List<String>) =
+        Maze(walls, start, end)
+            .shortestPathsToEnd()
+            .first().score
 
     override fun part2(lines: List<String>): Int {
         TODO("Not yet implemented")
