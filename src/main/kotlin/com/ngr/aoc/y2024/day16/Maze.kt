@@ -13,21 +13,21 @@ class Maze(
 ) {
     fun shortestPathToEndWithNormalFlood(): List<Dir> {
         val startPos = start
-        val toVisit = ArrayDeque(listOf(startPos to E))
+        val toVisit = ArrayDeque(listOf(startPos))
         val visited = mutableMapOf<Point, List<Dir>>(start to emptyList())
 
-        while (toVisit.isNotEmpty() && !(visited.containsKey(end))) {
-            val (currentPos, dir) = toVisit.removeFirst()
-            val currentPath = visited[currentPos]!!
+        while (toVisit.isNotEmpty()) {
+            val currentPos = toVisit.removeFirst()
+            val currentPath = visited[currentPos] ?: emptyList()
             if (currentPos != end) {
                 Dir.entries.forEach {
                     val newPos = currentPos + it
                     val newPath = currentPath + it
                     if (!walls.contains(newPos) &&
-                        !toVisit.contains(currentPos to it) &&
+                        !toVisit.contains(currentPos) &&
                         (!visited.containsKey(newPos) || visited[newPos]!!.score() > newPath.score())
                     ) {
-                        toVisit.add(newPos to it)
+                        toVisit.add(newPos)
                         visited[newPos] = newPath
                     }
                 }
@@ -130,7 +130,7 @@ data class Path(
 }
 
 fun List<Dir>.score() =
-    count() + filterIndexed { i, d -> d != if (i > 1) this[i - 1] else E }.count() * 1000
+    count() + filterIndexed { i, d -> d != if (i > 0) this[i - 1] else E }.count() * 1000
 
 enum class Step(val isTurn: Boolean, val score: Int, val applyTo: (Pos) -> Pos) {
     FORWARD(false, 1, { Pos(it.p + it.dir, it.dir) }),
@@ -164,6 +164,8 @@ enum class Dir(val dx: Int, val dy: Int) {
 }
 
 operator fun Point.plus(dir: Dir) = Point(x + dir.dx, y + dir.dy)
+operator fun Point.minus(dir: Dir) = Point(x - dir.dx, y - dir.dy)
+
 
 typealias Pos = Pair<Point, Dir>
 
