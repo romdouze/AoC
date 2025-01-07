@@ -26,8 +26,8 @@ class Day16 : Day<String, Int, Int>() {
 
     override fun part1(lines: List<String>) =
         Maze(walls, start, end)
-            .bestPathsToEnd()
-            .first().score
+            .shortestPathToEndWithNormalFlood()
+            .score()
 
     override fun part2(lines: List<String>) =
         Maze(walls, start, end)
