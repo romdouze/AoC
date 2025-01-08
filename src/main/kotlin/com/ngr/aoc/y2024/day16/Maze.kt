@@ -11,18 +11,18 @@ class Maze(
     private val start: Point,
     private val end: Point,
 ) {
-    fun shortestPathToEndWithNormalFlood(): List<Dir> {
+    fun shortestPathToEndWithNormalFlood(): Map<Point, SimplePath> {
         val startPos = start
         val toVisit = ArrayDeque(listOf(startPos))
-        val visited = mutableMapOf<Point, List<Dir>>(start to emptyList())
+        val visited = mutableMapOf<Point, SimplePath>(start to SimplePath(start))
 
         while (toVisit.isNotEmpty()) {
             val currentPos = toVisit.removeFirst()
-            val currentPath = visited[currentPos] ?: emptyList()
+            val currentPath = visited[currentPos]!!
             if (currentPos != end) {
                 Dir.entries.forEach {
                     val newPos = currentPos + it
-                    val newPath = currentPath + it
+                    val newPath = currentPath.addStep(it)
                     if (!walls.contains(newPos) &&
                         !toVisit.contains(currentPos) &&
                         (!visited.containsKey(newPos) || visited[newPos]!!.score() > newPath.score())
@@ -34,7 +34,7 @@ class Maze(
             }
         }
 
-        return visited[end]!!
+        return visited
     }
 
     fun shortestPathToEnd(): Path {
@@ -64,6 +64,33 @@ class Maze(
         return visited.filter { it.key.first == end }
             .minBy { it.value.score }
             .value
+    }
+
+    fun allBestPathsToEnd(): List<Path> {
+        val allPaths = shortestPathToEndWithNormalFlood()
+        val firstPathToEnd = allPaths[end]!!
+
+        val allBestPathsToEnd = mutableListOf(firstPathToEnd)
+
+        with(firstPathToEnd) {
+            p.withIndex()
+                .drop(1)
+                .reversed().forEach {
+                    val (i, p) = it
+                    val dir = dirs[i - 1]
+                    val partialScore = scoreAt(i)
+                    Dir.entries.filter { it != dir }
+                        .map { p + it }
+                        .forEach {
+                            val alternatePath = allPaths[it]
+                            if (alternatePath != null && alternatePath.score() <= partialScore) {
+                                allBestPathsToEnd.add(alternatePath)
+                            }
+                        }
+                }
+        }
+
+        return allBestPathsToEnd.map { it.toPath(start to E) }
     }
 
     fun bestPathsToEnd(): List<Path> {
@@ -129,8 +156,40 @@ data class Path(
     override fun hashCode() = steps.hashCode()
 }
 
-fun List<Dir>.score() =
-    count() + filterIndexed { i, d -> d != if (i > 0) this[i - 1] else E }.count() * 1000
+data class SimplePath(
+    val dirs: List<Dir> = emptyList(),
+    val p: List<Point>,
+) {
+    constructor(start: Point) : this(p = listOf(start))
+
+    fun addStep(dir: Dir) = SimplePath(dirs + dir, p + (p.last() + dir))
+
+    fun score() =
+        with(dirs) {
+            count() + filterIndexed { i, d -> d != if (i > 0) this[i - 1] else E }.count() * 1000
+        }
+
+    fun scoreAt(index: Int) =
+        SimplePath(dirs.subList(0, index), emptyList()).score()
+
+    fun toPath(from: Pos): Path {
+        val steps = mutableListOf<Step>()
+        val poses = mutableListOf<Pos>(from)
+
+        dirs.forEach { dir ->
+            val prevPos = poses.last()
+            val nextStep = Step.entries.first { it.applyTo(prevPos).dir == dir }
+            steps.add(nextStep)
+            if (nextStep.isTurn) {
+                steps.add(FORWARD)
+                poses.add(prevPos.p to dir)
+            }
+            poses.add(prevPos.p + dir to dir)
+        }
+
+        return Path(steps, poses)
+    }
+}
 
 enum class Step(val isTurn: Boolean, val score: Int, val applyTo: (Pos) -> Pos) {
     FORWARD(false, 1, { Pos(it.p + it.dir, it.dir) }),
