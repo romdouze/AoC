@@ -3,7 +3,7 @@ package com.ngr.aoc.y2024.day17
 import com.ngr.aoc.Day
 import java.io.InputStream
 
-class Day17 : Day<Int, String, Int>() {
+class Day17 : Day<Int, String, Long>() {
 
     private lateinit var computer: Computer
 
@@ -11,9 +11,9 @@ class Day17 : Day<Int, String, Int>() {
         val program = mutableListOf<Int>()
 
         data.bufferedReader().use {
-            val a = it.readLine().removePrefix("Register A: ").toInt()
-            val b = it.readLine().removePrefix("Register B: ").toInt()
-            val c = it.readLine().removePrefix("Register C: ").toInt()
+            val a = it.readLine().removePrefix("Register A: ").toLong()
+            val b = it.readLine().removePrefix("Register B: ").toLong()
+            val c = it.readLine().removePrefix("Register C: ").toLong()
 
             it.readLine()
 
@@ -33,5 +33,5 @@ class Day17 : Day<Int, String, Int>() {
         computer.copy().run(lines).output.joinToString(",")
 
     override fun part2(lines: List<Int>) =
-        CloneFinder(computer).findClone(lines)
+        CloneFinder().findLowestAForClone(lines)
 }
