@@ -94,6 +94,12 @@ data class Path(
         with(dirs) {
             count() + filterIndexed { i, d -> d != if (i > 0) this[i - 1] else E }.count() * 1000
         }
+
+    override fun equals(other: Any?) =
+        other is Path && other.dirs == dirs
+
+    override fun hashCode() =
+        dirs.hashCode()
 }
 
 enum class Dir(val dx: Int, val dy: Int) {
