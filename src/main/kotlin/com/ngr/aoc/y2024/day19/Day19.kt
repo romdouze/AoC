@@ -31,9 +31,10 @@ class Day19 : Day<String, Int, Int>() {
         // DO NOTHING
     }
 
-    override fun part1(lines: List<String>): Int {
-        TODO("Not yet implemented")
-    }
+    override fun part1(lines: List<String>) =
+        TowelMatcher(towels).let { matcher ->
+            lines.count { matcher.match(it).isNotEmpty() }
+        }
 
     override fun part2(lines: List<String>): Int {
         TODO("Not yet implemented")
