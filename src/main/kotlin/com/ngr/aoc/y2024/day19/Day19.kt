@@ -3,7 +3,7 @@ package com.ngr.aoc.y2024.day19
 import com.ngr.aoc.Day
 import java.io.InputStream
 
-class Day19 : Day<String, Int, Int>() {
+class Day19 : Day<String, Int, Long>() {
 
     private lateinit var towels: List<String>
 
@@ -32,12 +32,12 @@ class Day19 : Day<String, Int, Int>() {
     }
 
     override fun part1(lines: List<String>) =
-        TowelMatcher(towels, true).let { matcher ->
-            lines.count { matcher.match(it).isNotEmpty() }
+        TowelMatcher(towels).let { matcher ->
+            lines.count { matcher.matchCount(it) > 0 }
         }
 
     override fun part2(lines: List<String>) =
-        TowelMatcher(towels, false).let { matcher ->
-            lines.sumOf { matcher.match(it).count() }
+        TowelMatcher(towels).let { matcher ->
+            lines.sumOf { matcher.matchCount(it) }
         }
 }
