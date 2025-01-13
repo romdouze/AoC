@@ -4,7 +4,7 @@ import com.ngr.aoc.Day
 
 class Day21 : Day<String, Int, Int>() {
     override fun handleLine(lines: MutableList<String>, line: String) {
-        TODO("Not yet implemented")
+        lines.add(line)
     }
 
     override fun part1(lines: List<String>): Int {
