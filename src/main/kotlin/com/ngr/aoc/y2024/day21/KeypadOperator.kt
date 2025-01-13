@@ -9,9 +9,9 @@ class KeypadOperator(
     private val keypad = Keypad(keypadType)
     private var key = A
 
-    fun inputForCode(code: List<Key>) =
+    fun possibleInputsForCode(code: List<Key>) =
         code.flatMap { nextKey ->
-            (keypad.pathTo(key, nextKey) + Move.A)
+            (keypad.allPathsTo(key, nextKey).map { it + Move.A })
                 .also { key = nextKey }
         }
 }
@@ -20,16 +20,16 @@ class Keypad(
     private val type: KeypadType
 ) {
 
-    fun pathTo(from: Key, to: Key) =
+    fun allPathsTo(from: Key, to: Key) =
         type.pathCache.computeIfAbsent(from) { mutableMapOf() }
             .computeIfAbsent(to) {
-                computePathTo(from, to)
+                computeAllPathsTo(from, to)
             }
 
-    private fun computePathTo(from: Key, to: Key): List<Move> {
+    private fun computeAllPathsTo(from: Key, to: Key): List<List<Move>> {
         val fromPos = posOf(from)
         val toPos = posOf(to)
-        val visited = mutableMapOf(fromPos to emptyList<Move>())
+        val visited = mutableMapOf(fromPos to mutableListOf(emptyList<Move>()))
         val toVisit = ArrayDeque(listOf(fromPos))
 
         while (toVisit.isNotEmpty() && !visited.containsKey(toPos)) {
@@ -42,7 +42,8 @@ class Keypad(
                     !toVisit.contains(newPos)
                 ) {
                     toVisit.add(newPos)
-                    visited[newPos] = visited[currentPos]!! + move
+                    visited.computeIfAbsent(newPos) { mutableListOf() }
+                        .addAll(visited[currentPos]!!.map { it + move })
                 }
             }
         }
@@ -84,7 +85,7 @@ enum class KeypadType(
         )
     );
 
-    val pathCache = mutableMapOf<Key, MutableMap<Key, List<Move>>>()
+    val pathCache = mutableMapOf<Key, MutableMap<Key, List<List<Move>>>>()
 }
 
 enum class Key {
