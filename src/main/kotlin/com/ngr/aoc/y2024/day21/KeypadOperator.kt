@@ -10,9 +10,11 @@ class KeypadOperator(
     private var key = A
 
     fun possibleInputsForCode(code: List<Key>) =
-        code.flatMap { nextKey ->
+        code.map { nextKey ->
             (keypad.allPathsTo(key, nextKey).map { it + Move.A })
                 .also { key = nextKey }
+        }.reduce { acc, lists ->
+            acc.flatMap { path -> lists.map { path + it } }
         }
 }
 
@@ -29,26 +31,30 @@ class Keypad(
     private fun computeAllPathsTo(from: Key, to: Key): List<List<Move>> {
         val fromPos = posOf(from)
         val toPos = posOf(to)
-        val visited = mutableMapOf(fromPos to mutableListOf(emptyList<Move>()))
+        val visited = mutableMapOf(fromPos to mutableSetOf(Pair(emptyList<Move>(), listOf(fromPos))))
         val toVisit = ArrayDeque(listOf(fromPos))
 
-        while (toVisit.isNotEmpty() && !visited.containsKey(toPos)) {
+        while (toVisit.isNotEmpty()) {
             val currentPos = toVisit.removeFirst()
 
-            Move.moves.forEach { move ->
-                val newPos = currentPos + move
-                if (type.poses.contains(newPos) &&
-                    !visited.containsKey(newPos) &&
-                    !toVisit.contains(newPos)
-                ) {
-                    toVisit.add(newPos)
-                    visited.computeIfAbsent(newPos) { mutableListOf() }
-                        .addAll(visited[currentPos]!!.map { it + move })
+            if (currentPos != toPos) {
+                val previousPaths = visited[currentPos]!!
+                Move.moves.forEach { move ->
+                    val newPos = currentPos + move
+                    if (
+                        type.poses.contains(newPos) &&
+                        previousPaths.any { !it.second.contains(newPos) }
+                    ) {
+                        visited.computeIfAbsent(newPos) { mutableSetOf() }
+                            .addAll(previousPaths.filter { !it.second.contains(newPos) }
+                                .map { it.first + move to it.second + newPos })
+                            .also { if (it) toVisit.add(newPos) }
+                    }
                 }
             }
         }
 
-        return visited[toPos]!!
+        return visited[toPos]!!.map { it.first }
     }
 
     private fun posOf(key: Key): Point = type.keyPositions[key]
@@ -71,8 +77,8 @@ enum class KeypadType(
             Key.`5` to Point(1, 1),
             Key.`6` to Point(2, 1),
             Key.`7` to Point(0, 0),
-            Key.`8` to Point(0, 1),
-            Key.`9` to Point(0, 2),
+            Key.`8` to Point(1, 0),
+            Key.`9` to Point(2, 0),
         )
     ),
     DIRECTIONAL(
