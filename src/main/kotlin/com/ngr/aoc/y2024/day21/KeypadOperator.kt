@@ -11,7 +11,7 @@ class KeypadOperator(
 
     fun possibleInputsForCode(code: List<Key>) =
         code.map { nextKey ->
-            (keypad.allPathsTo(key, nextKey).map { it + Move.A })
+            (keypad.allBestPathsTo(key, nextKey).map { it + Move.A })
                 .also { key = nextKey }
         }.reduce { acc, lists ->
             acc.flatMap { path -> lists.map { path + it } }
@@ -27,6 +27,74 @@ class Keypad(
             .computeIfAbsent(to) {
                 computeAllPathsTo(from, to)
             }
+
+    private fun allShortestPaths(from: Key, to: Key): Map<Point, Path> {
+        val fromPos = posOf(from)
+        val toPos = posOf(to)
+        val toVisit = ArrayDeque(listOf(fromPos))
+        val visited = mutableMapOf(fromPos to Path(fromPos))
+
+        while (toVisit.isNotEmpty()) {
+            val currentPos = toVisit.removeFirst()
+            val currentPath = visited[currentPos]!!
+            if (currentPos != toPos) {
+                Move.moves.forEach {
+                    val newPos = currentPos + it
+                    val newPath = currentPath.addStep(it)
+                    if (
+                        type.poses.contains(newPos) &&
+                        !toVisit.contains(currentPos) &&
+                        (!visited.containsKey(newPos) || visited[newPos]!!.score() > newPath.score())
+                    ) {
+                        toVisit.add(newPos)
+                        visited[newPos] = newPath
+                    }
+                }
+            }
+        }
+
+        return visited
+    }
+
+    fun allBestPathsTo(from: Key, to: Key): List<List<Move>> {
+        val toPos = posOf(to)
+        val allPaths = allShortestPaths(from, to)
+        val firstBestPathToEnd = allPaths[toPos]!!
+        val bestScore = firstBestPathToEnd.score()
+
+        val allBestPathsToEnd = mutableSetOf(firstBestPathToEnd)
+
+        val toVisit = ArrayDeque(listOf(firstBestPathToEnd to 0))
+
+        while (toVisit.isNotEmpty()) {
+            val (bestPathToExplore, skip) = toVisit.removeFirst()
+
+            with(bestPathToExplore) {
+                p.withIndex()
+                    .drop(1)
+                    .reversed()
+                    .drop(if (skip > 0) skip - 1 else 0)
+                    .forEach {
+                        val (i, p) = it
+                        val move = moves[i - 1]
+                        Move.moves.filter { it != move }
+                            .forEach { newMove ->
+                                val newP = p - newMove
+                                val alternatePartialPath = allPaths[newP]
+                                if (alternatePartialPath != null) {
+                                    val alternatePath = alternatePartialPath.addStep(newMove)
+                                        .addSteps(moves.subList(i, moves.size))
+                                    if (alternatePath.score() <= bestScore && allBestPathsToEnd.add(alternatePath)) {
+                                        toVisit.add(alternatePath to i)
+                                    }
+                                }
+                            }
+                    }
+            }
+        }
+
+        return allBestPathsToEnd.map { it.moves }
+    }
 
     private fun computeAllPathsTo(from: Key, to: Key): List<List<Move>> {
         val fromPos = posOf(from)
@@ -59,6 +127,31 @@ class Keypad(
 
     private fun posOf(key: Key): Point = type.keyPositions[key]
         ?: error("No key $key for keypad $type")
+}
+
+data class Path(
+    val moves: List<Move> = emptyList(),
+    val p: List<Point>,
+) {
+    constructor(start: Point) : this(p = listOf(start))
+
+    fun addStep(move: Move) = Path(moves + move, p + (p.last() + move))
+
+    fun addSteps(moves: List<Move>): Path {
+        var newPath = Path(this.moves, p)
+        moves.forEach { move ->
+            newPath = newPath.addStep(move)
+        }
+        return newPath
+    }
+
+    fun score() = moves.count()
+
+    override fun equals(other: Any?) =
+        other is Path && other.moves == moves
+
+    override fun hashCode() =
+        moves.hashCode()
 }
 
 enum class KeypadType(
@@ -129,8 +222,8 @@ enum class Move(val dx: Int, val dy: Int, val key: Key) {
     }
 }
 
-operator fun Point.plus(move: Move) =
-    Point(x + move.dx, y + move.dy)
+operator fun Point.plus(move: Move) = Point(x + move.dx, y + move.dy)
+operator fun Point.minus(move: Move) = Point(x - move.dx, y - move.dy)
 
 fun List<Move>.toKeys() =
     map { it.key }

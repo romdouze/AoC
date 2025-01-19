@@ -129,9 +129,3 @@ enum class Dir(val dx: Int, val dy: Int) {
 
 operator fun Point.plus(dir: Dir) = Point(x + dir.dx, y + dir.dy)
 operator fun Point.minus(dir: Dir) = Point(x - dir.dx, y - dir.dy)
-
-
-typealias Pos = Pair<Point, Dir>
-
-val Pos.p: Point get() = first
-val Pos.dir: Dir get() = second

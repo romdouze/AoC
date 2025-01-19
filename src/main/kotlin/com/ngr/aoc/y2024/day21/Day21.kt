@@ -16,7 +16,15 @@ class Day21 : Day<String, Int, Int>() {
                     allPaths.filter { it.size == minSize }
                 }
                 .flatMap { KeypadOperator(KeypadType.DIRECTIONAL).possibleInputsForCode(it.toKeys()) }
+                .let { allPaths ->
+                    val minSize = allPaths.minOf { it.size }
+                    allPaths.filter { it.size == minSize }
+                }
                 .flatMap { KeypadOperator(KeypadType.DIRECTIONAL).possibleInputsForCode(it.toKeys()) }
+                .let { allPaths ->
+                    val minSize = allPaths.minOf { it.size }
+                    allPaths.filter { it.size == minSize }
+                }
                 .minBy { it.size }.size * code.dropLast(1).toInt()
         }
 
