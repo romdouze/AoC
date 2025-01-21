@@ -10,17 +10,17 @@ class Day21 : Day<String, Int, Int>() {
 
     override fun part1(lines: List<String>) =
         lines.sumOf { code ->
-            KeypadOperator(NUMERIC).possibleInputsForCode(code.toKeys())
+            KeypadOperator(NUMERIC).allShortestInputsForCode(code.toKeys())
                 .let { allPaths ->
                     val minSize = allPaths.minOf { it.size }
                     allPaths.filter { it.size == minSize }
                 }
-                .flatMap { KeypadOperator(KeypadType.DIRECTIONAL).possibleInputsForCode(it.toKeys()) }
+                .flatMap { KeypadOperator(KeypadType.DIRECTIONAL).allShortestInputsForCode(it.toKeys()) }
                 .let { allPaths ->
                     val minSize = allPaths.minOf { it.size }
                     allPaths.filter { it.size == minSize }
                 }
-                .flatMap { KeypadOperator(KeypadType.DIRECTIONAL).possibleInputsForCode(it.toKeys()) }
+                .flatMap { KeypadOperator(KeypadType.DIRECTIONAL).allShortestInputsForCode(it.toKeys()) }
                 .let { allPaths ->
                     val minSize = allPaths.minOf { it.size }
                     allPaths.filter { it.size == minSize }

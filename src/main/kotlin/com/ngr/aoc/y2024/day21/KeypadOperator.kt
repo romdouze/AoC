@@ -9,7 +9,7 @@ class KeypadOperator(
     private val keypad = Keypad(keypadType)
     private var key = A
 
-    fun possibleInputsForCode(code: List<Key>) =
+    fun allShortestInputsForCode(code: List<Key>) =
         code.map { nextKey ->
             (keypad.allBestPathsTo(key, nextKey).map { it + Move.A })
                 .also { key = nextKey }
@@ -21,42 +21,13 @@ class KeypadOperator(
 class Keypad(
     private val type: KeypadType
 ) {
-
-    fun allPathsTo(from: Key, to: Key) =
+    fun allBestPathsTo(from: Key, to: Key) =
         type.pathCache.computeIfAbsent(from) { mutableMapOf() }
             .computeIfAbsent(to) {
-                computeAllPathsTo(from, to)
+                allShortestPathsTo(from, to)
             }
 
-    private fun allShortestPaths(from: Key, to: Key): Map<Point, Path> {
-        val fromPos = posOf(from)
-        val toPos = posOf(to)
-        val toVisit = ArrayDeque(listOf(fromPos))
-        val visited = mutableMapOf(fromPos to Path(fromPos))
-
-        while (toVisit.isNotEmpty()) {
-            val currentPos = toVisit.removeFirst()
-            val currentPath = visited[currentPos]!!
-            if (currentPos != toPos) {
-                Move.moves.forEach {
-                    val newPos = currentPos + it
-                    val newPath = currentPath.addStep(it)
-                    if (
-                        type.poses.contains(newPos) &&
-                        !toVisit.contains(currentPos) &&
-                        (!visited.containsKey(newPos) || visited[newPos]!!.score() > newPath.score())
-                    ) {
-                        toVisit.add(newPos)
-                        visited[newPos] = newPath
-                    }
-                }
-            }
-        }
-
-        return visited
-    }
-
-    fun allBestPathsTo(from: Key, to: Key): List<List<Move>> {
+    private fun allShortestPathsTo(from: Key, to: Key): List<List<Move>> {
         val toPos = posOf(to)
         val allPaths = allShortestPaths(from, to)
         val firstBestPathToEnd = allPaths[toPos]!!
@@ -85,7 +56,7 @@ class Keypad(
                                     val alternatePath = alternatePartialPath.addStep(newMove)
                                         .addSteps(moves.subList(i, moves.size))
                                     if (alternatePath.score() <= bestScore && allBestPathsToEnd.add(alternatePath)) {
-                                        toVisit.add(alternatePath to i)
+                                        toVisit.add(alternatePath to i - 1)
                                     }
                                 }
                             }
@@ -96,33 +67,32 @@ class Keypad(
         return allBestPathsToEnd.map { it.moves }
     }
 
-    private fun computeAllPathsTo(from: Key, to: Key): List<List<Move>> {
+    private fun allShortestPaths(from: Key, to: Key): Map<Point, Path> {
         val fromPos = posOf(from)
         val toPos = posOf(to)
-        val visited = mutableMapOf(fromPos to mutableSetOf(Pair(emptyList<Move>(), listOf(fromPos))))
         val toVisit = ArrayDeque(listOf(fromPos))
+        val visited = mutableMapOf(fromPos to Path(fromPos))
 
         while (toVisit.isNotEmpty()) {
             val currentPos = toVisit.removeFirst()
-
+            val currentPath = visited[currentPos]!!
             if (currentPos != toPos) {
-                val previousPaths = visited[currentPos]!!
-                Move.moves.forEach { move ->
-                    val newPos = currentPos + move
+                Move.moves.forEach {
+                    val newPos = currentPos + it
+                    val newPath = currentPath.addStep(it)
                     if (
                         type.poses.contains(newPos) &&
-                        previousPaths.any { !it.second.contains(newPos) }
+                        !toVisit.contains(currentPos) &&
+                        (!visited.containsKey(newPos) || visited[newPos]!!.score() > newPath.score())
                     ) {
-                        visited.computeIfAbsent(newPos) { mutableSetOf() }
-                            .addAll(previousPaths.filter { !it.second.contains(newPos) }
-                                .map { it.first + move to it.second + newPos })
-                            .also { if (it) toVisit.add(newPos) }
+                        toVisit.add(newPos)
+                        visited[newPos] = newPath
                     }
                 }
             }
         }
 
-        return visited[toPos]!!.map { it.first }
+        return visited
     }
 
     private fun posOf(key: Key): Point = type.keyPositions[key]
