@@ -1,13 +1,37 @@
 package com.ngr.aoc.y2024.day21
 
-import com.ngr.aoc.y2024.day21.Key.A
+import com.ngr.aoc.y2024.day21.KeypadType.NUMERIC
 import java.awt.Point
+import java.util.concurrent.ConcurrentHashMap
+
+class KeypadChain(
+    private val depth: Int,
+) {
+    fun shortestInputForCode(code: String) =
+        KeypadOperator(NUMERIC).allShortestInputsForCode(code.toKeys())
+            .let { allPaths ->
+                val minSize = allPaths.minOf { it.size }
+                allPaths.filter { it.size == minSize }
+            }.let {
+                var currentPaths = it
+                repeat(depth) { depth ->
+                    currentPaths = currentPaths
+                        .flatMap { KeypadOperator(KeypadType.DIRECTIONAL).allShortestInputsForCode(it.toKeys()) }
+                        .let { allPaths ->
+                            val minSize = allPaths.minOf { it.size }
+                            allPaths.filter { it.size == minSize }
+                        }
+                }
+                currentPaths
+            }
+            .minBy { it.size }.size * code.dropLast(1).toInt()
+}
 
 class KeypadOperator(
     keypadType: KeypadType,
 ) {
     private val keypad = Keypad(keypadType)
-    private var key = A
+    private var key = Key.A
 
     fun allShortestInputsForCode(code: List<Key>) =
         code.map { nextKey ->
@@ -154,7 +178,7 @@ enum class KeypadType(
         )
     );
 
-    val pathCache = mutableMapOf<Key, MutableMap<Key, List<List<Move>>>>()
+    val pathCache = ConcurrentHashMap<Key, MutableMap<Key, List<List<Move>>>>()
 }
 
 enum class Key {
