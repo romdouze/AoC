@@ -1,30 +1,27 @@
 package com.ngr.aoc.y2024.day21
 
 import com.ngr.aoc.y2024.day21.KeypadType.NUMERIC
+import com.ngr.aoc.y2024.day21.Move.A
+import com.ngr.aoc.y2024.day21.Move.E
+import com.ngr.aoc.y2024.day21.Move.N
+import com.ngr.aoc.y2024.day21.Move.S
+import com.ngr.aoc.y2024.day21.Move.W
 import java.awt.Point
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.abs
 
 class KeypadChain(
     private val depth: Int,
 ) {
     fun shortestInputForCode(code: String) =
-        KeypadOperator(NUMERIC).allShortestInputsForCode(code.toKeys())
-            .let { allPaths ->
-                val minSize = allPaths.minOf { it.size }
-                allPaths.filter { it.size == minSize }
-            }.let {
+        KeypadOperator(NUMERIC).shortestInputForCode(code.toKeys()).let {
                 var currentPaths = it
-                repeat(depth) { depth ->
+            repeat(depth) {
                     currentPaths = currentPaths
-                        .flatMap { KeypadOperator(KeypadType.DIRECTIONAL).allShortestInputsForCode(it.toKeys()) }
-                        .let { allPaths ->
-                            val minSize = allPaths.minOf { it.size }
-                            allPaths.filter { it.size == minSize }
-                        }
+                        .let { KeypadOperator(KeypadType.DIRECTIONAL).shortestInputForCode(it.toKeys()) }
                 }
                 currentPaths
-            }
-            .minBy { it.size }.size * code.dropLast(1).toInt()
+        }.size * code.dropLast(1).toInt()
 }
 
 class KeypadOperator(
@@ -33,125 +30,59 @@ class KeypadOperator(
     private val keypad = Keypad(keypadType)
     private var key = Key.A
 
-    fun allShortestInputsForCode(code: List<Key>) =
+    fun shortestInputForCode(code: List<Key>) =
         code.map { nextKey ->
-            (keypad.allBestPathsTo(key, nextKey).map { it + Move.A })
+            (keypad.bestPathTo(key, nextKey) + A)
                 .also { key = nextKey }
-        }.reduce { acc, lists ->
-            acc.flatMap { path -> lists.map { path + it } }
+        }.reduce { acc, list ->
+            acc + list
         }
 }
 
 class Keypad(
     private val type: KeypadType
 ) {
-    fun allBestPathsTo(from: Key, to: Key) =
-        type.pathCache.computeIfAbsent(from) { mutableMapOf() }
+    fun bestPathTo(from: Key, to: Key) =
+        type.pathCache.computeIfAbsent(from) { ConcurrentHashMap() }
             .computeIfAbsent(to) {
-                allShortestPathsTo(from, to)
-            }
+                // Only for NUMERIC, DIRECTIONAL is prefilled
 
-    private fun allShortestPathsTo(from: Key, to: Key): List<List<Move>> {
-        val toPos = posOf(to)
-        val allPaths = allShortestPaths(from, to)
-        val firstBestPathToEnd = allPaths[toPos]!!
-        val bestScore = firstBestPathToEnd.score()
+                if (from == to) return@computeIfAbsent emptyList()
 
-        val allBestPathsToEnd = mutableSetOf(firstBestPathToEnd)
+                val bottomRow = listOf(Key.`0`, Key.A)
+                val leftColumn = listOf(Key.`1`, Key.`4`, Key.`7`)
+                val orderedMoves =
+                    if (from in bottomRow && to in leftColumn || from in leftColumn && to in bottomRow)
+                        listOf(N, E, S, W)
+                    else listOf(W, S, N, E)
 
-        val toVisit = ArrayDeque(listOf(firstBestPathToEnd to 0))
+                val fromPos = posOf(from)
+                val toPos = posOf(to)
+                val dx = toPos.x - fromPos.x
+                val dy = toPos.y - fromPos.y
 
-        while (toVisit.isNotEmpty()) {
-            val (bestPathToExplore, skip) = toVisit.removeFirst()
+                val moves = mutableListOf<Move>()
 
-            with(bestPathToExplore) {
-                p.withIndex()
-                    .drop(1)
-                    .reversed()
-                    .drop(if (skip > 0) skip - 1 else 0)
-                    .forEach {
-                        val (i, p) = it
-                        val move = moves[i - 1]
-                        Move.moves.filter { it != move }
-                            .forEach { newMove ->
-                                val newP = p - newMove
-                                val alternatePartialPath = allPaths[newP]
-                                if (alternatePartialPath != null) {
-                                    val alternatePath = alternatePartialPath.addStep(newMove)
-                                        .addSteps(moves.subList(i, moves.size))
-                                    if (alternatePath.score() <= bestScore && allBestPathsToEnd.add(alternatePath)) {
-                                        toVisit.add(alternatePath to i - 1)
-                                    }
-                                }
-                            }
-                    }
-            }
-        }
-
-        return allBestPathsToEnd.map { it.moves }
-    }
-
-    private fun allShortestPaths(from: Key, to: Key): Map<Point, Path> {
-        val fromPos = posOf(from)
-        val toPos = posOf(to)
-        val toVisit = ArrayDeque(listOf(fromPos))
-        val visited = mutableMapOf(fromPos to Path(fromPos))
-
-        while (toVisit.isNotEmpty()) {
-            val currentPos = toVisit.removeFirst()
-            val currentPath = visited[currentPos]!!
-            if (currentPos != toPos) {
-                Move.moves.forEach {
-                    val newPos = currentPos + it
-                    val newPath = currentPath.addStep(it)
-                    if (
-                        type.poses.contains(newPos) &&
-                        !toVisit.contains(currentPos) &&
-                        (!visited.containsKey(newPos) || visited[newPos]!!.score() > newPath.score())
-                    ) {
-                        toVisit.add(newPos)
-                        visited[newPos] = newPath
+                orderedMoves.forEach {
+                    when {
+                        it == W && dx < 0 -> repeat(abs(dx)) { moves.add(W) }
+                        it == E && dx > 0 -> repeat(abs(dx)) { moves.add(E) }
+                        it == N && dy < 0 -> repeat(abs(dy)) { moves.add(N) }
+                        it == S && dy > 0 -> repeat(abs(dy)) { moves.add(S) }
                     }
                 }
-            }
-        }
 
-        return visited
-    }
+                moves
+            }
 
     private fun posOf(key: Key): Point = type.keyPositions[key]
         ?: error("No key $key for keypad $type")
 }
 
-data class Path(
-    val moves: List<Move> = emptyList(),
-    val p: List<Point>,
-) {
-    constructor(start: Point) : this(p = listOf(start))
-
-    fun addStep(move: Move) = Path(moves + move, p + (p.last() + move))
-
-    fun addSteps(moves: List<Move>): Path {
-        var newPath = Path(this.moves, p)
-        moves.forEach { move ->
-            newPath = newPath.addStep(move)
-        }
-        return newPath
-    }
-
-    fun score() = moves.count()
-
-    override fun equals(other: Any?) =
-        other is Path && other.moves == moves
-
-    override fun hashCode() =
-        moves.hashCode()
-}
-
 enum class KeypadType(
     val keyPositions: Map<Key, Point>,
     val keys: Set<Key> = keyPositions.keys,
-    val poses: Set<Point> = keyPositions.values.toSet()
+    pathCache: Map<Key, Map<Key, List<Move>>> = emptyMap(),
 ) {
     NUMERIC(
         mapOf(
@@ -169,16 +100,61 @@ enum class KeypadType(
         )
     ),
     DIRECTIONAL(
-        mapOf(
+        keyPositions = mapOf(
             Key.A to Point(2, 0),
             Key.`>` to Point(2, 1),
             Key.v to Point(1, 1),
             Key.`<` to Point(0, 1),
             Key.`^` to Point(1, 0),
+        ),
+        pathCache = mapOf(
+            Key.A to mapOf(
+                Key.A to emptyList(),
+                Key.`>` to listOf(S),
+                Key.v to listOf(W, S),
+                Key.`<` to listOf(S, W, W),
+                Key.`^` to listOf(W),
+            ),
+            Key.`>` to mapOf(
+                Key.A to listOf(N),
+                Key.`>` to emptyList(),
+                Key.v to listOf(W),
+                Key.`<` to listOf(W, W),
+                Key.`^` to listOf(W, N),
+            ),
+            Key.v to mapOf(
+                Key.A to listOf(N, E),
+                Key.`>` to listOf(E),
+                Key.v to emptyList(),
+                Key.`<` to listOf(W),
+                Key.`^` to listOf(N),
+            ),
+            Key.`<` to mapOf(
+                Key.A to listOf(E, E, N),
+                Key.`>` to listOf(E, E),
+                Key.v to listOf(E),
+                Key.`<` to emptyList(),
+                Key.`^` to listOf(E, N),
+            ),
+            Key.`^` to mapOf(
+                Key.A to listOf(E),
+                Key.`>` to listOf(S, E),
+                Key.v to listOf(S),
+                Key.`<` to listOf(S, W),
+                Key.`^` to emptyList(),
+            ),
         )
     );
 
-    val pathCache = ConcurrentHashMap<Key, MutableMap<Key, List<List<Move>>>>()
+    val pathCache = ConcurrentHashMap<Key, ConcurrentHashMap<Key, List<Move>>>()
+        .also { cache ->
+            pathCache.entries.forEach { entry ->
+                cache.computeIfAbsent(entry.key) { ConcurrentHashMap() }
+                entry.value.entries.forEach { moves ->
+                    cache[entry.key]!!.computeIfAbsent(moves.key) { moves.value }
+                }
+            }
+        }
 }
 
 enum class Key {
@@ -209,15 +185,8 @@ enum class Move(val dx: Int, val dy: Int, val key: Key) {
     S(0, 1, Key.v),
     W(-1, 0, Key.`<`),
     N(0, -1, Key.`^`),
-    A(0, 0, Key.A);
-
-    companion object {
-        val moves = entries.minus(A)
-    }
+    A(0, 0, Key.A)
 }
-
-operator fun Point.plus(move: Move) = Point(x + move.dx, y + move.dy)
-operator fun Point.minus(move: Move) = Point(x - move.dx, y - move.dy)
 
 fun List<Move>.toKeys() =
     map { it.key }
