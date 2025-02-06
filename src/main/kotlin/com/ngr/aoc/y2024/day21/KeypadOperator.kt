@@ -15,13 +15,35 @@ class KeypadChain(
 ) {
     fun shortestInputForCode(code: String) =
         KeypadOperator(NUMERIC).shortestInputForCode(code.toKeys()).let {
-                var currentPaths = it
-            repeat(depth) {
-                    currentPaths = currentPaths
-                        .let { KeypadOperator(KeypadType.DIRECTIONAL).shortestInputForCode(it.toKeys()) }
+            var key = A
+            it.sumOf { nextKey ->
+                (shortestInputForKeys(depth, key.key, nextKey.key))
+                    .also { key = nextKey }
+            }
+        } * code.dropLast(1).toLong()
+
+    private fun shortestInputForKeys(depth: Int, from: Key, to: Key): Long {
+        if (from == to)
+            return 1L
+
+        return chainCache.computeIfAbsent(depth) { ConcurrentHashMap() }
+            .computeIfAbsent(from to to) {
+                val input = KeypadOperator(KeypadType.DIRECTIONAL).shortestInputForKeys(from, to)
+                if (depth <= 1) {
+                    input.size.toLong()
+                } else {
+                    var key = A
+                    input.sumOf { nextKey ->
+                        shortestInputForKeys(depth - 1, key.key, nextKey.key)
+                            .also { key = nextKey }
+                    }
                 }
-                currentPaths
-        }.size * code.dropLast(1).toInt()
+            }
+    }
+
+    private companion object {
+        private val chainCache = ConcurrentHashMap<Int, ConcurrentHashMap<Pair<Key, Key>, Long>>()
+    }
 }
 
 class KeypadOperator(
@@ -37,6 +59,8 @@ class KeypadOperator(
         }.reduce { acc, list ->
             acc + list
         }
+
+    fun shortestInputForKeys(from: Key, to: Key) = keypad.bestPathTo(from, to) + A
 }
 
 class Keypad(

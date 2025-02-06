@@ -2,7 +2,7 @@ package com.ngr.aoc.y2024.day21
 
 import com.ngr.aoc.Day
 
-class Day21 : Day<String, Int, Int>() {
+class Day21 : Day<String, Long, Long>() {
     override fun handleLine(lines: MutableList<String>, line: String) {
         lines.add(line)
     }
