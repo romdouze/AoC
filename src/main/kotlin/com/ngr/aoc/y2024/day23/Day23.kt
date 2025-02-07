@@ -15,5 +15,5 @@ class Day23 : Day<Pair<String, String>, Int, String>() {
             .count { it.any { it.startsWith("t") } }
 
     override fun part2(lines: List<Pair<String, String>>) =
-        LanParty(lines).findLanParty().joinToString(separator = ",")
+        LanParty(lines).findLanParty().sorted().joinToString(separator = ",")
 }

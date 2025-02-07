@@ -33,7 +33,20 @@ class LanParty(
         return triples
     }
 
-    fun findLanParty(): List<String> {
-        network.keys.
+    fun findLanParty() =
+        findTriples().map {
+            findMaximalCliqueFrom(it)
+        }.maxBy { it.size }
+
+    private fun findMaximalCliqueFrom(clique: List<String>): List<String> {
+        val maximalClique = clique.toMutableList()
+
+        (network.keys - clique).forEach { v ->
+            if (maximalClique.all { network[it]!!.contains(v) }) {
+                maximalClique.add(v)
+            }
+        }
+
+        return maximalClique
     }
 }
