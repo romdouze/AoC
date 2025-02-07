@@ -72,7 +72,7 @@ enum class Instruction(val opcode: Int, val operandType: OperandType, val operat
         a = (a / 2.0.pow(it.toDouble())).toLong()
     }),
     BXL(1, LITERAL, {
-        b = b.xor(it)
+        b = b xor it
     }),
     BST(2, COMBO, {
         b = it % 8
@@ -83,7 +83,7 @@ enum class Instruction(val opcode: Int, val operandType: OperandType, val operat
         }
     }),
     BXC(4, LITERAL, {
-        b = b.xor(c)
+        b = b xor c
     }),
     OUT(5, COMBO, {
         output.add(it % 8)

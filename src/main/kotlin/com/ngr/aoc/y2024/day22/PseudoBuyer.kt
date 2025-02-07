@@ -56,7 +56,7 @@ class PseudoBuyer(
         this.toString().last().digitToInt()
 
     private fun Long.mixWith(other: Long) =
-        this.xor(other)
+        this xor other
 
     private fun Long.prune() =
         this % 16777216
