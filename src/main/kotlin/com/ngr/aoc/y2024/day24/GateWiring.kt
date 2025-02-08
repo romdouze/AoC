@@ -1,9 +1,13 @@
 package com.ngr.aoc.y2024.day24
 
+import java.io.File
+
 class CircuitFixer(
     private val gates: List<Gate>,
     private val startingValues: Map<String, Boolean>,
 ) {
+    private val gateMap = gates.associateBy { it.output }
+
     fun findFix(): List<String> {
         val x = startingValues.entries
             .filter { it.key.startsWith("x") }
@@ -12,24 +16,21 @@ class CircuitFixer(
             .filter { it.key.startsWith("y") }
             .asNumber()
 
-        val pairsToSwap = gates.flatMap { g1: Gate ->
-            gates.minus(g1).flatMap { g2: Gate ->
-                gates.minus(setOf(g1, g2)).flatMap { g3: Gate ->
-                    gates.minus(setOf(g1, g2, g3)).flatMap { g4: Gate ->
-                        gates.minus(setOf(g1, g2, g3, g4)).flatMap { g5: Gate ->
-                            gates.minus(setOf(g1, g2, g3, g4, g5)).flatMap { g6: Gate ->
-                                gates.minus(setOf(g1, g2, g3, g4, g5, g6)).flatMap { g7: Gate ->
-                                    gates.minus(setOf(g1, g2, g3, g4, g5, g6, g7)).map { g8: Gate ->
-                                        listOf(g1 to g2, g3 to g4, g5 to g6, g7 to g8)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }.first { pairs ->
-            System.err.println(pairs)
+        /*  Identified with graphviz: circuit should be a full adder
+           wpd <-> z11
+           jqf <-> skh
+           mdd <-> z19
+           wts <-> z37
+         */
+
+        val pairsToSwap = listOf(
+            listOf(
+                gateMap["wpd"]!! to gateMap["z11"]!!,
+                gateMap["jqf"]!! to gateMap["skh"]!!,
+                gateMap["mdd"]!! to gateMap["z19"]!!,
+                gateMap["wts"]!! to gateMap["z37"]!!,
+            )
+        ).first { pairs ->
             val newGates = gates.toMutableList()
                 .apply {
                     removeAll(pairs.map { it.first } + pairs.map { it.second })
@@ -56,7 +57,7 @@ class CircuitFixer(
 }
 
 class Circuit(
-    gates: List<Gate>,
+    private val gates: List<Gate>,
     startingValues: Map<String, Boolean>,
 ) {
 
@@ -86,6 +87,17 @@ class Circuit(
         outputs.entries
             .filter { it.key.startsWith("z") }
             .asNumber()
+
+    fun asGraphviz() {
+        File("src/main/resources/output/2024/24/graphviz.txt")
+            .bufferedWriter().use { out ->
+                gates.forEachIndexed { i, gate ->
+                    out.write("${gate.input1} -> ${gate.gateType}$i\n")
+                    out.write("${gate.input2} -> ${gate.gateType}$i\n")
+                    out.write("${gate.gateType}$i -> ${gate.output}\n")
+                }
+            }
+    }
 }
 
 fun List<Map.Entry<String, Boolean>>.asNumber() =
@@ -178,5 +190,3 @@ enum class GateType {
             GateType.entries.first { it.name == s }
     }
 }
-
-
