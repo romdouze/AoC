@@ -1,12 +1,12 @@
 package com.ngr.aoc.y2025.day1
 
-import com.ngr.aoc.Day
+import com.ngr.aoc.common.WithInputHandling
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class Day1Test {
+class Day1Test : WithInputHandling() {
 
     private lateinit var day1: Day1
 
@@ -256,13 +256,5 @@ class Day1Test {
 
             assertThat(output).isEqualTo(6)
         }
-    }
-
-    private fun <InputType> Day<InputType, *, *>.handleInput(input: String): List<InputType> {
-        val output = mutableListOf<InputType>()
-        input.lines().forEach {
-            handleLine(output, it)
-        }
-        return output
     }
 }
