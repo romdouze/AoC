@@ -1,19 +1,12 @@
 package com.ngr.aoc.y2025.day1
 
+import com.ngr.aoc.common.WithDayTest
 import com.ngr.aoc.common.WithInputHandling
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class Day1Test : WithInputHandling() {
-
-    private lateinit var day1: Day1
-
-    @BeforeEach
-    fun setup() {
-        day1 = Day1()
-    }
+class Day1Test : WithInputHandling, WithDayTest<Day1>(Day1::class) {
 
     @Nested
     inner class Part2 {
@@ -24,9 +17,9 @@ class Day1Test : WithInputHandling() {
             R250
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(3)
         }
@@ -38,9 +31,9 @@ class Day1Test : WithInputHandling() {
             R200
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(3)
         }
@@ -52,9 +45,9 @@ class Day1Test : WithInputHandling() {
             L200
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(3)
         }
@@ -66,9 +59,9 @@ class Day1Test : WithInputHandling() {
             L100
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(2)
         }
@@ -80,9 +73,9 @@ class Day1Test : WithInputHandling() {
             R100
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(2)
         }
@@ -93,9 +86,9 @@ class Day1Test : WithInputHandling() {
             R50
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(1)
         }
@@ -107,9 +100,9 @@ class Day1Test : WithInputHandling() {
             R1
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(1)
         }
@@ -120,9 +113,9 @@ class Day1Test : WithInputHandling() {
             R49
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(0)
         }
@@ -133,9 +126,9 @@ class Day1Test : WithInputHandling() {
             L50
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(1)
         }
@@ -146,9 +139,9 @@ class Day1Test : WithInputHandling() {
             L51
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(1)
         }
@@ -160,9 +153,9 @@ class Day1Test : WithInputHandling() {
             R418
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(7)
         }
@@ -174,9 +167,9 @@ class Day1Test : WithInputHandling() {
             R118
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(4)
         }
@@ -188,9 +181,9 @@ class Day1Test : WithInputHandling() {
             R18
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(3)
         }
@@ -202,9 +195,9 @@ class Day1Test : WithInputHandling() {
             R19
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(3)
         }
@@ -215,9 +208,9 @@ class Day1Test : WithInputHandling() {
             L168
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(2)
         }
@@ -228,9 +221,9 @@ class Day1Test : WithInputHandling() {
             L68
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(1)
         }
@@ -250,9 +243,9 @@ class Day1Test : WithInputHandling() {
             L82
         """.trimIndent()
 
-            val lines = day1.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day1.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(6)
         }

@@ -1,19 +1,12 @@
 package com.ngr.aoc.y2025.day5
 
+import com.ngr.aoc.common.WithDayTest
 import com.ngr.aoc.common.WithInputHandling
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
-class Day5Test : WithInputHandling() {
-
-    private lateinit var day5: Day5
-
-    @BeforeEach
-    fun setup() {
-        day5 = Day5()
-    }
+class Day5Test : WithInputHandling, WithDayTest<Day5>(Day5::class) {
 
     @Nested
     inner class Part2 {
@@ -23,9 +16,9 @@ class Day5Test : WithInputHandling() {
                 3-5
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(3)
         }
@@ -37,9 +30,9 @@ class Day5Test : WithInputHandling() {
                 6-9
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(7)
         }
@@ -51,9 +44,9 @@ class Day5Test : WithInputHandling() {
                 6-9
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(7)
         }
@@ -65,9 +58,9 @@ class Day5Test : WithInputHandling() {
                 6-9
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(7)
         }
@@ -79,9 +72,9 @@ class Day5Test : WithInputHandling() {
                 3-8
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(7)
         }
@@ -93,9 +86,9 @@ class Day5Test : WithInputHandling() {
                 5-8
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(7)
         }
@@ -107,9 +100,9 @@ class Day5Test : WithInputHandling() {
                 3-9
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(7)
         }
@@ -123,9 +116,9 @@ class Day5Test : WithInputHandling() {
                 12-18
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(14)
         }
@@ -141,9 +134,9 @@ class Day5Test : WithInputHandling() {
                 3-4
             """.trimIndent()
 
-            val lines = day5.handleInput(input)
+            val lines = day.handleInput(input)
 
-            val output = day5.part2(lines)
+            val output = day.part2(lines)
 
             assertThat(output).isEqualTo(17)
         }
