@@ -1,6 +1,7 @@
 package com.ngr.aoc.y2023.day24
 
 import com.ngr.aoc.Day
+import com.ngr.aoc.common.generateAllPairs
 import java.math.MathContext
 import java.math.RoundingMode
 import kotlin.math.roundToLong
@@ -16,9 +17,7 @@ class Day24 : Day<HailStone, Int, Long>() {
     override fun part1(lines: List<HailStone>): Int {
         val window = 200000000000000.0..400000000000000.0
 
-        val allPairs = lines.flatMapIndexed { index, h ->
-            lines.drop(index + 1).map { h to it }
-        }
+        val allPairs = lines.generateAllPairs()
 
         return allPairs.count {
             it.first.intersection2DWith(it.second)

@@ -1,5 +1,7 @@
 package com.ngr.aoc.y2024.day23
 
+import com.ngr.aoc.common.generateAllPairs
+
 class LanParty(
     connections: List<Pair<String, String>>
 ) {
@@ -19,15 +21,12 @@ class LanParty(
         val triples = mutableSetOf<List<String>>()
 
         network.keys.forEach { first ->
-            network[first]!!.let { connectionsOfFirst ->
-                connectionsOfFirst.flatMapIndexed { i, second ->
-                    connectionsOfFirst.subList(i + 1, connectionsOfFirst.size).map { second to it }
+            network[first]!!.generateAllPairs()
+                .filter { (second, third) ->
+                    network[second]!!.contains(third)
+                }.forEach { (second, third) ->
+                    triples.add(listOf(first, second, third).sorted())
                 }
-            }.filter { (second, third) ->
-                network[second]!!.contains(third)
-            }.forEach { (second, third) ->
-                triples.add(listOf(first, second, third).sorted())
-            }
         }
 
         return triples

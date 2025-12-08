@@ -1,6 +1,7 @@
 package com.ngr.aoc.y2023.day11
 
 import com.ngr.aoc.Day
+import com.ngr.aoc.common.generateAllPairs
 import java.awt.Point
 import kotlin.math.abs
 import kotlin.math.max
@@ -28,9 +29,7 @@ class Day11 : Day<String, Long, Long>() {
             .filter { x -> galaxies.none { it.x == x } }.toSet()
 
         val galaxiesList = galaxies.toList()
-        val allPairs = galaxiesList.flatMapIndexed { index, p1 ->
-            (index + 1 until galaxiesList.size).map { p1 to galaxiesList[it] }
-        }
+        val allPairs = galaxiesList.generateAllPairs()
 
         return allPairs.sumOf { it.first.distance(it.second, emptyRows, emptyCols, 2L) }
     }
@@ -42,9 +41,7 @@ class Day11 : Day<String, Long, Long>() {
             .filter { x -> galaxies.none { it.x == x } }.toSet()
 
         val galaxiesList = galaxies.toList()
-        val allPairs = galaxiesList.flatMapIndexed { index, p1 ->
-            (index + 1 until galaxiesList.size).map { p1 to galaxiesList[it] }
-        }
+        val allPairs = galaxiesList.generateAllPairs()
 
         return allPairs.sumOf { it.first.distance(it.second, emptyRows, emptyCols, 1000000L) }
     }
