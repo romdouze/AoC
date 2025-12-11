@@ -2,7 +2,7 @@ package com.ngr.aoc.y2025.day10
 
 import com.ngr.aoc.Day
 
-class Day10 : Day<FactoryMachine, Int, Long>() {
+class Day10 : Day<FactoryMachine, Int, Int>() {
     override fun handleLine(
         lines: MutableList<FactoryMachine>,
         line: String
@@ -13,7 +13,6 @@ class Day10 : Day<FactoryMachine, Int, Long>() {
     override fun part1(lines: List<FactoryMachine>) =
         lines.sumOf { it.findFewestPressesToTargetIndicators() }
 
-    override fun part2(lines: List<FactoryMachine>): Long {
-        TODO("Not yet implemented")
-    }
+    override fun part2(lines: List<FactoryMachine>) =
+        lines.sumOf { it.findFewestPressesToTargetJoltage() }
 }
