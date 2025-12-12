@@ -37,51 +37,46 @@ data class FactoryMachine(
             }
     }
 
-    fun findFewestPressesToTargetJoltage(): Int {
-        val toVisit = ArrayDeque(listOf(List(buttons.size) { 0 }))
+    private val pressesCache = mutableMapOf<List<Boolean>, List<List<Int>>>()
 
-        var fewestPresses = Int.MAX_VALUE
-        while (toVisit.isNotEmpty()) {
-            val presses = toVisit.removeFirst()
-            val joltage = computeJoltage(presses)
+    fun findFewestPressesToTargetJoltage() = findFewestPressesToJoltage(targetJoltage)
 
-            if (joltage.withIndex().none { it.value > targetJoltage[it.index] }) {
-                if (joltage == targetJoltage) {
-                    val nbPresses = presses.sum()
-                    if (nbPresses < fewestPresses) {
-                        fewestPresses = nbPresses
-                    }
-                }
+    fun findFewestPressesToJoltage(targetJoltage: List<Int>): Int {
+        if (targetJoltage.any { it < 0 }) return 1000000 // No possible solution
+        if (targetJoltage.all { it == 0 }) return 0
 
-                presses.indices.forEach {
-                    val newPresses = presses.toMutableList()
+        val oddJoltage = targetJoltage.map { it % 2 == 1 }
 
-                    newPresses[it] = newPresses[it] + 1
+        return findAllPressesToIndicators(oddJoltage).minOfOrNull { presses ->
+            val resultingJoltage = targetJoltage
+                .mapIndexed { i, j -> j - presses.count { buttons[it].contains(i) } }
+                .map { it / 2 }
 
-                    if (!(toVisit.contains(newPresses))) {
-                        toVisit.add(newPresses)
-                    }
-                }
-            }
-        }
-
-        return fewestPresses
+            2 * findFewestPressesToJoltage(resultingJoltage) + presses.size
+        } ?: 1000000 // No possible solution
     }
 
-    fun findFewestPressesToTargetIndicators() =
-        enumerateButtonCombinations()
-            .filter { combination ->
-                val indicators = targetIndicators.map { false }.toMutableList()
-                combination.map { buttons[it] }
-                    .forEach { button ->
-                        button.forEach { indicators[it] = !(indicators[it]) }
-                    }
-                indicators == targetIndicators
-            }
-            .minOf { it.size }
+    fun findFewestPressesToTargetIndicators() = findFewestPressesToIndicators(targetIndicators)
+
+    fun findFewestPressesToIndicators(targetIndicators: List<Boolean>) =
+        findAllPressesToIndicators(targetIndicators).minOf { it.size }
+
+    fun findAllPressesToIndicators(targetIndicators: List<Boolean>) =
+        pressesCache.getOrPut(targetIndicators) {
+            enumerateButtonCombinations()
+                .filter { combination ->
+                    val indicators = targetIndicators.map { false }.toMutableList()
+                    combination.map { buttons[it] }
+                        .forEach { button ->
+                            button.forEach { indicators[it] = !(indicators[it]) }
+                        }
+                    indicators == targetIndicators
+                }
+        }
+
 
     private fun enumerateButtonCombinations() =
-        (1 until (2.0.pow(buttons.size).toInt())).map {
+        (0 until (2.0.pow(buttons.size).toInt())).map {
             it.toButtonCombination()
         }
 
@@ -89,13 +84,4 @@ data class FactoryMachine(
         toString(2).reversed().let { str ->
             buttons.indices.filter { str.getOrElse(it) { '0' } == '1' }
         }
-
-    private fun computeJoltage(presses: List<Int>): List<Int> {
-        val joltage = mutableMapOf<Int, Int>()
-        presses.forEachIndexed { buttonIndex, nb ->
-            buttons[buttonIndex].forEach { joltage[it] = joltage.getOrDefault(it, 0) + nb }
-        }
-
-        return joltage.entries.sortedBy { it.key }.map { it.value }.toList()
-    }
 }
