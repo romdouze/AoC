@@ -1,5 +1,7 @@
 package com.ngr.aoc.y2025.day11
 
+import java.io.File
+
 data class Node(
     val name: String,
     val outputs: List<String>,
@@ -21,18 +23,31 @@ class Network {
         nodes[node.name] = node
     }
 
-    fun nbPaths(from: String, to: String): Int {
+    fun nbPaths(from: String, to: String, stopNodes: List<String> = emptyList()): Int {
         var nbPaths = 0
         val toVisit = ArrayDeque(listOf(nodes[from]!!))
 
         while (toVisit.isNotEmpty()) {
             val node = toVisit.removeFirst()
-            node.outputs.forEach {
-                if (it == to) nbPaths++
-                else toVisit.add(nodes[it]!!)
+            if (!stopNodes.contains(node.name)) {
+                node.outputs.forEach {
+                    if (it == to) nbPaths++
+                    else toVisit.add(nodes[it]!!)
+                }
             }
         }
 
         return nbPaths
+    }
+
+    fun asGraphviz() {
+        File("src/main/resources/output/2025/11/graphviz.txt")
+            .bufferedWriter().use { out ->
+                nodes.values.forEach { node ->
+                    node.outputs.forEach {
+                        out.write("${node.name} -> ${it}\n")
+                    }
+                }
+            }
     }
 }
